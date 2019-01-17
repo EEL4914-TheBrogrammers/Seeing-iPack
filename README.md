@@ -2,8 +2,8 @@
 Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR sensor, and camera, we will create a backpack that guides the user similar to a seeing eye dog or walking stick.
 
 # Due
-- [ ] 2/24/18: Preliminary Design Report
 - [ ] 1/28/18: Presentation 
+- [ ] 2/24/18: Preliminary Design Report
 
 # TO-DO
 - [ ] Interface RaspberryPi with MSP432 via SPI
