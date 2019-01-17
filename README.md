@@ -10,3 +10,12 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 	- [ ] Calculate distance from time and speed of sound
 - [ ] Get distance and signal strength from LiDAR sensor
 - [ ] Start machine learning
+
+- [ ] Preliminary Design Report
+- [ ] Presentation
+
+# Research Topics
+- [ ] Canny Edge Detection
+- [ ] Use for neural networks
+- [ ] Lane detection for vehicles
+- [ ] Spec sheets for each component
