@@ -1,0 +1,9 @@
+- Go into /boot/config.txt and uncomment dtparams=spi=on to enable hardware interfaces
+
+- Run "lsmod" on command line. Shows loadable kernel modules
+	- Displays spi_bcm2835
+	- Displays spidev
+
+- Pin 19 = MOSI (SPI)
+  Pin 21 = MISO (SPI)
+  Pin 23 = SCLK (SPI)
