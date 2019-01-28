@@ -1,93 +1,49 @@
 #include "msp432p401r.h"
-#include "msp.h"
-//#include <ti/drivers/GPIO.h>
-//#include <ti/drivers/SPI.h>
 #include <string.h>
-#include "msp432p401r_classic.h"
 
 /**
  * main.c
  */
 
 char cmdbuf[20];
-char cmd_index=0;
-
-/** Delay function. **/
-void delay(unsigned int d) {
-  int i;
-  for (i = 0; i<d; i++) {
-    __no_operation();
-  }
-}
-
-void flash_spi_detected(void) {
-    int i=0;
-    P1OUT = 0;
-    for (i=0; i < 6; ++i) {
-        P1OUT = ~P1OUT;
-        delay(0x4fff);
-        delay(0x4fff);
-    }
-}
+int cmd_index=0;
 
 void main(void) {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
-	
-	//P6DIR |= BIT6;
+
 	P1DIR |= BIT0;
-	while (P1IN & BIT5);                   // If clock sig from mstr stays low, it is not yet in SPI mode
-	flash_spi_detected();                 // Blink 3 times
-	
-	//FLASH SPI BITCH
-//	while(1) {
-//	    if(P1IN & BIT5) {
-//	        P1OUT = ~P1OUT;
-//	    } else if(P1IN & ~BIT5) {
-//	        P1OUT = ~P1OUT;
-//	    }
-//	    delay(0x4fff);
-//	    delay(0x4fff);
-//	}
+	while (P1IN & BIT5);            // If clock sig from mstr stays low, it is not yet in SPI mode
 
-	P1SEL0 = BIT5 + BIT6 + BIT7;       // B0 clk + SIMO + SOMI
-	P1SEL1 = BIT5 + BIT6 + BIT7;       // B0 clk + SIMO + SOMI
+    P1->SEL0 |= BIT5 | BIT6 | BIT7;
 
-//	P6SEL0 = BIT6;              // B3SDA
-//	P6SEL1 = BIT6;              // B3SDA
-	
-//	EUSCI_A1->CTLW0 |= EUSCI_A_CTLW0_SWRST; // Put eUSCI state machine in reset
-//	EUSCI_A1->CTLW0 = EUSCI_A_CTLW0_SWRST | // Remain eUSCI state machine in reset
-////	            EUSCI_A_CTLW0_MST |             // Set as SPI master
-//	            EUSCI_A_CTLW0_SYNC |            // Set as synchronous mode
-//	            EUSCI_A_CTLW0_CKPL |            // Set clock polarity high
-//	            EUSCI_A_CTLW0_MSB;              // MSB first
-//	EUSCI_A1->CTLW0 |= EUSCI_A_CTLW0_SSEL__ACLK; // ACLK
-////	EUSCI_A1->BRW = 0x01;                   // /2,fBitClock = fBRCLK/(UCBRx+1).
-//	EUSCI_A1->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;// Initialize USCI state machine
+	EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST; // Put eUSCI state machine in reset
+	EUSCI_B0->CTLW0 = EUSCI_B_CTLW0_SWRST | // Remain eUSCI state machine in reset
+	            EUSCI_B_CTLW0_SYNC |            // Set as synchronous mode
+	            EUSCI_B_CTLW0_CKPL |            // Set clock polarity high
+	            EUSCI_B_CTLW0_MSB;              // MSB first
 
-	UCB0CTLW0 |= UCSWRST;            // Enable software reset
-	UCB0CTLW0 = UCSWRST | UCMSB | UCSYNC | UCCKPL;    // 3-pin, 8-bit, most sig bit, synchronous mode
-	UCB0CTLW0 &= ~UCSWRST;
+	EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SSEL__ACLK;// ACLK
+	EUSCI_B0->BRW = 0x01;                       // /2,fBitClock = fBRCLK/(UCBRx+1).
+	EUSCI_B0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;    // Initialize USCI state machine
+	EUSCI_B0->IE |= EUSCI_B_IE_RXIE;        // Enable USCI_B0 RX interrupt
 	
-	UCB0IE |= UCRXIE;                // Enable RX interrupt
+	SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;        // Remain on LPM after ISR finishes
+
+	// Ensures SLEEPONEXIT takes effect immediately
+	__DSB();
 	
+	// Global interrupt
 	__enable_irq();
+
+	// Enable eUSCI_B0 interrupt in NVIC module
 	NVIC->ISER[0] = 1 << ((EUSCIB0_IRQn) & 31);           // Enable interrupts
 
-//	  while(1) {
-//	      if(UCB0STATW & UCBUSY) {
-//	          P1OUT = ~P1OUT;
-//	      }
-//	      delay(0x4fff);
-//	      delay(0x4fff);
-//	  }
-
-
-	while(1);
+	__sleep();
+	__no_operation();
 }
 
 void EUSCIB0_IRQHandler() {
-    char value = UCB0RXBUF;
+    char value = UCB0RXBUF >> 1;
     if (value == '\n') {
         if (strncmp(cmdbuf, "HELLO WORLD", 11) == 0) {
             P1OUT |= BIT0;
@@ -99,5 +55,9 @@ void EUSCIB0_IRQHandler() {
         cmdbuf[cmd_index] = value;
         cmd_index++;
     }
-    UCB0IFG &= ~UCRXIFG;
+
+    while (!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG));
+
+    // Echo received data
+    EUSCI_B0->TXBUF = 0x0B << 1;        // Test echo 0x0B
 }
