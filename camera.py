@@ -18,3 +18,4 @@ elif mode == 'video':
 	camera.stop_recording()
 
 camera.stop_preview()
+
