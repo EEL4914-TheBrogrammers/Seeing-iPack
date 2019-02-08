@@ -23,4 +23,4 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - [x] Spec sheets for each component
 
 # 2/8/19 Weekly Meeting
-*HI
+- Completed interfacing RaspberryPi with MSP432 via SPI. Both the RaspberryPi and MSP432 can receive and transfer data to and from each other. This link will help as we start on our guiding algorithm.
