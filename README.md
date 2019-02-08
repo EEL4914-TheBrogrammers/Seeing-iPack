@@ -34,5 +34,5 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **In progress:** Applying Canny Edge Detection on a video.
 
 ## Questions
-- Design Opinion: LiDAR size
+- **Design Opinion:** LiDAR size
 - MSP432 debugging circuit
