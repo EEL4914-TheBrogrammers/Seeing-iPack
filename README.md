@@ -29,6 +29,7 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **Completed:** Interfacing ultrasonic sensor with MSP432 via GPIO and Timer modules. Based on the time between the rising edge and the falling edge from the Echo pin, the distance can be calculated using the formula *Distance = (time in uSec)/58*.
 - **Completed:** Interfacing RaspberryPi 3B+ with RaspberryPi Camera V2. Camera can take images and video and store them to specified files.
 - **Completed:** Breakout board PCB for Ultrasonic sensors.
+- **Completed:** Testing images using cv2 Canny function.
 - **In progress:** Microcontroller PCB
 - **In progress:** Interfacing LiDAR with MSP432 via UART.
 - **In progress:** Applying Canny Edge Detection on a video.
