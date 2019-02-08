@@ -3,7 +3,7 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 
 # Due
 - [x] 1/28/18: Presentation 
-- [ ] 2/4/18: Preliminary Design Report
+- [x] 2/4/18: Preliminary Design Report
 
 # TO-DO
 - [x] Interface RaspberryPi with MSP432 via SPI
@@ -13,14 +13,26 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 	- [x] Get time reading from sensor
 	- [x] Calculate distance from time and speed of sound
 - [ ] Get distance and signal strength from LiDAR sensor
-- [ ] Start machine learning
-- [ ] Start designing PCB
+- [x] Start computer vision
+- [ ] Start guiding algorithm
+- [x] Start designing PCB
 
 # Research Topics
-- [ ] Canny Edge Detection
+- [x] Canny Edge Detection
 - [ ] Use for neural networks
 - [ ] Lane detection for vehicles
 - [x] Spec sheets for each component
 
 # 2/8/19 Weekly Meeting
+## Tasks
 - Completed interfacing RaspberryPi with MSP432 via SPI. Both the RaspberryPi and MSP432 can receive and transfer data to and from each other. This link will help as we start on our guiding algorithm.
+- Completed interfacing ultrasonic sensor with MSP432 via GPIO and Timer modules. Based on the time between the rising edge and the falling edge from the Echo pin, the distance can be calculated using the formula *Distance = (time in uSec)/58*.
+- Completed interfacing RaspberryPi 3B+ with RaspberryPi Camera V2. Camera can take images and video and store them to specified files.
+- Completed breakout board PCB for Ultrasonic sensors.
+- In progress: Microcontroller PCB
+- In progress: Interfacing LiDAR with MSP432 via UART.
+- In progress: Applying Canny Edge Detection on a video.
+
+## Questions
+- Design Opinion: LiDAR size
+- MSP432 debugging circuit
