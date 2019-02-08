@@ -21,3 +21,6 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - [ ] Use for neural networks
 - [ ] Lane detection for vehicles
 - [x] Spec sheets for each component
+
+# 2/8/19 Weekly Meeting
+*HI
