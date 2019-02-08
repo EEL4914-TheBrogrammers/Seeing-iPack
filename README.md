@@ -25,12 +25,13 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 
 # 2/8/19 Weekly Meeting
 ## Tasks
-- **Completed:** Ordered all parts.
+- **Completed:** Ordered ultrasonic sensors (HC-SR04), Raspberry Pi 3B+, and Raspberry Pi Camera V2.
 - **Completed:** Interfacing RaspberryPi with MSP432 via SPI.
 - **Completed:** Interfacing ultrasonic sensor with MSP432 via GPIO and Timer modules.
 - **Completed:** Interfacing RaspberryPi 3B+ with RaspberryPi Camera V2. Camera can take images and video and store them to files.
 - **Completed:** Breakout board PCB for Ultrasonic sensors.
 - **Completed:** Testing images using cv2 Canny function.
+- **In progress:** Order vibration motors, rechargeable battery pack parts, and backpack materials.
 - **In progress:** Microcontroller PCB
 - **In progress:** Interfacing LiDAR with MSP432 via UART.
 - **In progress:** Applying Canny Edge Detection on a video.
