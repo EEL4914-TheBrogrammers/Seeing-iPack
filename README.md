@@ -7,11 +7,11 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 
 # TO-DO
 - [x] Interface RaspberryPi with MSP432 via SPI
-- [ ] Get picture from RaspberryPi and camera
-- [ ] Get video from RaspberryPi and camera
-- [ ] Get distance readings from ultrasonic sensor
-	- [ ] Get time reading from sensor
-	- [ ] Calculate distance from time and speed of sound
+- [x] Get picture from RaspberryPi and camera
+- [x] Get video from RaspberryPi and camera
+- [x] Get distance readings from ultrasonic sensor
+	- [x] Get time reading from sensor
+	- [x] Calculate distance from time and speed of sound
 - [ ] Get distance and signal strength from LiDAR sensor
 - [ ] Start machine learning
 - [ ] Start designing PCB
