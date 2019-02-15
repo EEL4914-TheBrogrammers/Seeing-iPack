@@ -44,7 +44,8 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **Completed:** Breakout board PCB for Ultrasonic sensors.
 - **Completed:** Testing images using cv2 Canny function.
 - **Completed:** Measuring ultrasonic sensor range (height, width, and length)
-- **In progress:** Order vibration motors, rechargeable battery pack parts (LM3420 Lithium-Ion Battery Charge Controller), and backpack materials.
+- **In progress:** Order vibration motors, battery charger IC, and backpack materials.
 - **In progress:** Microcontroller PCB
 - **In progress:** Interfacing LiDAR with MSP432 via I2C.
 - **In progress:** Applying Canny Edge Detection on a video.
+- **In progress:** Meetings with Rich to discuss project ideas and feedback.
