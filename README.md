@@ -23,7 +23,7 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - [ ] Lane detection for vehicles
 - [x] Spec sheets for each component
 
-# 2/8/19 Weekly Meeting
+<!-- # 2/8/19 Weekly Meeting
 ## Tasks
 - **Completed:** Ordered ultrasonic sensors (HC-SR04), Raspberry Pi 3B+, and Raspberry Pi Camera V2.
 - **Completed:** Interfacing RaspberryPi with MSP432 via SPI.
@@ -34,9 +34,18 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **In progress:** Order vibration motors, rechargeable battery pack parts, and backpack materials.
 - **In progress:** Microcontroller PCB
 - **In progress:** Interfacing LiDAR with MSP432 via UART.
-- **In progress:** Applying Canny Edge Detection on a video.
+- **In progress:** Applying Canny Edge Detection on a video. -->
 
-## Questions
-- **Design Opinion:** LiDAR size
-- MSP432 debugging circuit
-- Soldering MSP432 chip onto PCB
+# 2/15/19 Weekly Meeting
+## Tasks
+- **Completed:** Interfacing RaspberryPi with MSP432 via SPI.
+- **Completed:** Interfacing ultrasonic sensor with MSP432 via GPIO and Timer modules.
+- **Completed:** Interfacing RaspberryPi 3B+ with RaspberryPi Camera V2. Camera can take images and video and store them to files.
+- **Completed:** Breakout board PCB for Ultrasonic sensors.
+- **Completed:** Testing images using cv2 Canny function.
+- **Completed:** Measuring ultrasonic sensor range (height, width, and length)
+
+- **In progress:** Order vibration motors, rechargeable battery pack parts (LM3420 Lithium-Ion Battery Charge Controller), and backpack materials.
+- **In progress:** Microcontroller PCB
+- **In progress:** Interfacing LiDAR with MSP432 via I2C.
+- **In progress:** Applying Canny Edge Detection on a video.
