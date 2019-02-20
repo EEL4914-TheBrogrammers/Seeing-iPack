@@ -49,3 +49,11 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **In progress:** Interfacing LiDAR with MSP432 via I2C.
 - **In progress:** Applying Canny Edge Detection on a video.
 - **In progress:** Meetings with Rich to discuss project ideas and feedback.
+
+# 2/20/19 Weekly Meeting
+## Tasks
+- **Completed:** Setting up Raspberry Pi Touchscreen LCD.
+- **Completed:** Set up SSH on Raspberry Pi to allow for remote access.
+- **Completed:** Microcontroller PCB v1 (Ultrasonic header, Raspberry Pi header, LiDAR header, microcontroller, IC conversion from 5V to 3.3V).
+- **In progress:** Setting up Emic2 TTS. Able to run TTS successfully using UART on DAD. Debugging UART code for MSP432.
+- **In progress:** Setting up Garmin LiDAR Lite v3. Debugging I2C code for MSP432.
