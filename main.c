@@ -1,104 +1,169 @@
+/* --COPYRIGHT--,BSD_EX
+ * Copyright (c) 2014, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *******************************************************************************
+ *
+ *                       MSP432 CODE EXAMPLE DISCLAIMER
+ *
+ * MSP432 code examples are self-contained low-level programs that typically
+ * demonstrate a single peripheral function or device feature in a highly
+ * concise manner. For this the code may rely on the device's power-on default
+ * register values and settings such as the clock configuration and care must
+ * be taken when combining code from several examples to avoid potential side
+ * effects. Also see http://www.ti.com/tool/mspdriverlib for an API functional
+ * library & https://dev.ti.com/pinmux/ for a GUI approach to peripheral configuration.
+ *
+ * --/COPYRIGHT--*/
+//******************************************************************************
+//  MSP432P401 Demo  - eUSCI_B0 I2C Master RX multiple bytes from MSP432 Slave
+//
+//  Description: This demo connects two MSP432's via the I2C bus. The master
+//  reads 5 bytes from the slave. This is the MASTER CODE. The data from the slave
+//  transmitter begins at 0 and increments with each transfer.
+//  The USCI_B0 RX interrupt is used to know when new data has been received.
+//
+//    *****used with "msp432p401x_euscib0_i2c_11.c"****
+//
+//                                 |    |
+//               MSP432P401      10k  10k     MSP432P401
+//                   slave         |    |        master
+//             -----------------   |    |   -----------------
+//            |     P1.6/UCB0SDA|<-|----|->|P1.6/UCB0SDA     |
+//            |                 |  |       |                 |
+//            |                 |  |       |                 |
+//            |     P1.7/UCB0SCL|<-|------>|P1.7/UCB0SCL     |
+//            |                 |          |             P1.0|--> LED
+//
+//   William Goh
+//   Texas Instruments Inc.
+//   June 2016 (updated) | June 2014 (created)
+//   Built with CCSv6.1, IAR, Keil, GCC
+//******************************************************************************
 #include "msp.h"
-#include <string.h>
+#include <stdint.h>
 
-/**************************************************
- *                                                *
- *                  Definitions                   *
- *                                                *
- **************************************************/
-#define ACQ_COMMAND         (0x00)  // Device command
-#define STATUS              (0x01)  // System status
-#define DISTANCE            (0x8f)  // Distance measurement
-#define FULL_DELAY_HIGH     (0x0f)  // Distance measurement high byte
-#define FULL_DELAY_LOW      (0x10)  // Distance measurement low byte
+short tx_addr;      // Address to transmit
+short tx_data;      // Data to transmit
+short lvalue;       // Low byte distance measurement
+short hvalue;       // High byte distance measurement
 
-#define SLAVE_ADDR          (0x62)  // LiDAR slave address
-#define WRITE_ADDR          (0xC4)  // LiDAR write address
-#define READ_ADDR           (0xC5)  // LiDAR read address
+int counter;        // Keeps track of what to do in interrupt
+int avg_count;      // Counter to calculate average distance
+float sum;          // Sum of 100 distances to calculate average distance
 
-char *tx_type_1 = "TX_2_TX";
-char *tx_type_2 = "TX_2_RX";
-char *RX_STAT = "RX_stat";
-char *RX_DIST = "RX_dist";
+void manual_reset() {
+    volatile uint32_t i;
+    P1->SEL0 &= ~BIT7;      // Change P1.7 to GPIO pin
+    P1->DIR |= BIT7;
 
+    for(i = 0; i < 9; i++) {
+        volatile uint32_t j;
+        volatile uint32_t k;
 
-/**************************************************
- *                                                *
- *              Global Variables                  *
- *                                                *
- **************************************************/
-short tx_addr;
-short tx_data;
-char *step;
-char *rx_step;
-int rx_status_complete;
+        // Delay between transmissions
+        __delay_cycles(1);
+        P1->OUT |= BIT7;
 
-short lbyte;
-short hbyte;
-short stat;
+        // Delay between transmissions
+        __delay_cycles(1);
+        P1->OUT &= ~BIT7;
+    }
 
-int tx_complete;
+    P1->OUT |= BIT7;
+    P1->DIR &= ~BIT7;
 
-int counter;
-int num_times_tx_called;
-int num_of_rx;
-int type_rx;
-int write;
-int turn;
+    P1->SEL0 |= BIT7;       // Change P1.7 back to SCL pin
+}
 
-
-/**************************************************
- *                                                *
- *                  Functions                     *
- *                                                *
- **************************************************/
-
-void i2c_tx(short address, short data, int write_flag){
-    num_times_tx_called++;
+void i2c_tx(short address, short data){
     // Set slave address register and data address
     tx_addr = address;
     tx_data = data;
 
-    if (write_flag == 0) {
-        step = "TX_2_RX";
-    } else if (write_flag == 1) {
-        step = "TX_2_TX";
-    }
+    counter = 1;
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TR + EUSCI_B_CTLW0_TXSTT;  // Transmit start condition
+    while ((EUSCI_B0->CTLW0 & EUSCI_B_CTLW0_TXSTT));
 
-    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TR + EUSCI_B_CTLW0_TXSTT; // Transmit start condition
-    __sleep();
+    while (!(EUSCI_B0->CTLW0 & EUSCI_B_CTLW0_TXSTP));              // Ensure stop condition got sent
 
+    while (EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0);
 }
 
-void i2c_rx(char *rx_type){
-    if (strcmp(rx_type, "RX_STAT") == 0){
-        rx_step = "RX_STAT";
-    } else if (strcmp(rx_type, "RX_DIST") == 0){
-        rx_step = "RX_DIST";
-    }
+unsigned short i2c_rx(short address){
+    volatile uint32_t i;
+    tx_addr = address;
 
-    EUSCI_B0->CTLW0 &= ~UCTR;
-    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTT; // Transmit start condition
-    __sleep();
+    counter = 4;
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TR + EUSCI_B_CTLW0_TXSTT;  // Transmit start condition
+
+    while ((EUSCI_B0->CTLW0 & EUSCI_B_CTLW0_TXSTT));
+    while (!(EUSCI_B0->CTLW0 & EUSCI_B_CTLW0_TXSTP));              // Ensure stop condition got sent
+    while (EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0);
+
+
+    // Arbitrary delay before transmitting the next byte
+    for (i = 250; i > 0; i--);
+
+    counter = 6;
+    EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_TR;           //Set Receiver bit
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTT;         //Set start bit
+    while ((EUSCI_B0->CTLW0 & EUSCI_B_CTLW0_TXSTT));
+
+    while (EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG0);
+
+    counter = 0;
+
+    return lvalue;
 }
 
-void main(void)
+void delay_ms(unsigned int delay){
+    while (delay--) {
+        __delay_cycles(3000);
+    }
+}
+
+int main(void)
 {
     volatile uint32_t i;
 
-	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;	// stop watchdog timer
+    WDT_A->CTL = WDT_A_CTL_PW |             // Stop watchdog timer
+            WDT_A_CTL_HOLD;
 
-	counter = 0;
-	num_times_tx_called  = 0;
-	turn = 0;
-	hbyte = 0;
-	lbyte = 0;
-	num_of_rx = 0;
-	tx_complete = 0;
-	rx_status_complete = 0;
-	step = "TX_2_TX";
+    manual_reset();
 
-	P1->SEL0 |= BIT6 | BIT7;        // P1.6(SDA), P1.7(SCL)
+
+    delay_ms(44);
+
+
+    P1->SEL0 |= BIT6 | BIT7;                // I2C pins
 
     // Enable global interrupt
     __enable_irq();
@@ -107,139 +172,103 @@ void main(void)
     NVIC->ISER[0] = 1 << ((EUSCIB0_IRQn) & 31);
 
     // Configure USCI_B0 for I2C mode
-    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;     // Software reset enabled
-    EUSCI_B0->CTLW0 = EUSCI_B_CTLW0_SWRST |     // Remain eUSCI in reset mode
-            EUSCI_B_CTLW0_MODE_3 |              // I2C mode
-            EUSCI_B_CTLW0_MST |                 // Master mode
-            EUSCI_B_CTLW0_SYNC |                // Sync mode
-            EUSCI_B_CTLW0_SSEL__SMCLK;          // SMCLK
-    EUSCI_B0->BRW = 7;                          // baudrate = SMCLK / 7 = 400kHz
-    EUSCI_B0->I2CSA = SLAVE_ADDR;               // Slave address
-    EUSCI_B0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;    // Release eUSCI from reset
+    EUSCI_B0->CTLW0 |= EUSCI_A_CTLW0_SWRST; // Software reset enabled
+    EUSCI_B0->CTLW0 = EUSCI_A_CTLW0_SWRST | // Remain eUSCI in reset mode
+            EUSCI_B_CTLW0_MODE_3 |          // I2C mode
+            EUSCI_B_CTLW0_MST |             // Master mode
+            EUSCI_B_CTLW0_SYNC |            // Sync mode
+            EUSCI_B_CTLW0_SSEL__SMCLK;      // SMCLK
 
-    EUSCI_B0->IE |= EUSCI_B_IE_TXIE |       // Enable transmit interrupt
-            EUSCI_B_IE_NACKIE |             // Enable NACK interrupt
-            EUSCI_B_IE_RXIE;                // Enable receive interrupt
+    EUSCI_B0->BRW = 30;                     // baudrate = SMCLK / 30 = 100kHz
+    EUSCI_B0->I2CSA = 0x0062;               // Slave address
+    EUSCI_B0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;// Release eUSCI from reset
 
-    while (1) {
-        // Don't wake up on exit from ISR
-        SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
+    EUSCI_B0->IE |= EUSCI_B_IE_RXIE |       // Enable receive interrupt
+            EUSCI_B_IE_TXIE;
 
-        // Ensures SLEEPONEXIT takes effect immediately
-        __DSB();
+    avg_count = 0;
 
-        // Delay between transmissions
-        for (i = 1000; i > 0; i--);
+    while (1)
+    {
+        i2c_tx(0x00, 0x04);
 
-        counter = 0;
+        // Arbitrary delay before transmitting the next byte
+        for (i = 250; i > 0; i--);
 
-        // Ensure stop condition got sent
-        while (EUSCI_B0->CTLW0 & EUSCI_B_CTLW0_TXSTP);
+        i2c_rx(0x8F);
 
-        if (strcmp(step, tx_type_1) == 0  && rx_status_complete == 0) {
-            i2c_tx(ACQ_COMMAND, 0x04, 1);
-        } else if (strcmp(step, tx_type_2) == 0 && tx_complete == 0  && rx_status_complete == 0) {
-            i2c_tx(STATUS, 0x00, 0);
-            tx_complete = 1;
-        } else if (tx_complete == 1  && rx_status_complete == 0) {
-            i2c_rx("RX_STAT");
-            tx_complete = 2;
-        } else if (tx_complete == 2) {
-            i2c_tx(DISTANCE, 0x00, 0);
-            tx_complete = 0;
-            rx_status_complete = 1;
-        } else if (strcmp(rx_step, "RX_DIST") == 0 && rx_status_complete == 1){
-            i2c_rx("RX_DIST");
-            rx_status_complete = 200;
+        // Arbitrary delay before transmitting the next byte
+        for (i = 250; i > 0; i--);
+
+        i2c_tx(0x00, 0x00);
+
+        // Arbitrary delay before transmitting the next byte
+        for (i = 250; i > 0; i--);
+
+        // Average the distances for 100 samples to get accurate distance
+        if (avg_count == 1000){
+            float average_cm = sum/1000.0;
+            float average_in = average_cm/2.54;
+            avg_count = 0;
+            sum = 0;
+        } else {
+            // Discard bad distance readings
+            sum += lvalue;
+            avg_count++;
         }
-
-        if (lbyte != 0) {
-            int temp;
-            temp = 0;
-        }
-
-        // Go to LPM0
-//        __sleep();
-        __no_operation();                   // for debug
     }
 }
 
 // I2C interrupt service routine
 void EUSCIB0_IRQHandler(void)
 {
-    if (EUSCI_B0->IFG & EUSCI_B_IFG_NACKIFG) {
-        EUSCI_B0->IFG &= ~EUSCI_B_IFG_NACKIFG;
-        // I2C start condition
-        EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTT;
-    }
-
-    if (EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0) {
-        // Clear TX interrupt flag
-        EUSCI_B0->IFG &= ~EUSCI_B_IFG_TXIFG0;
-
-        if (counter == 0) {             // Transfer register address
-            EUSCI_B0->TXBUF = tx_addr;
-            if (strcmp(step, tx_type_1) == 0) {          // TX address & data
+    if (!(EUSCI_B0->IFG & EUSCI_B_IFG_NACKIFG)) {
+        switch(counter){
+            case 1:{
+                EUSCI_B0->TXBUF = tx_addr;
                 counter++;
-            } else if (strcmp(step, tx_type_2) == 0) {   // TX addess only
-                step = "RX_DIST";
-                counter = 2;
+                break;
             }
-        } else if (counter == 1) {      // Transfer register data
-            EUSCI_B0->TXBUF = tx_data;
-            step = "TX_2_RX";
-            counter++;
-        } else if (counter == 2) {      // Generate stop bit
-            // I2C stop condition
-            EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTP;
-
-            // Clear USCI_B0 TX int flag
-            EUSCI_B0->IFG &= ~EUSCI_B_IFG_TXIFG;
-            counter = 0;
-
-            // Wake up on exit from ISR
-            SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
-
-            // Ensures SLEEPONEXIT takes effect immediately
-            __DSB();
-        }
-    }
-
-    if (EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG0) {
-        if (strcmp(rx_step, "RX_STAT") == 0) {
-            stat = EUSCI_B0->RXBUF;
-            while (stat & 0x01) {
-                stat = EUSCI_B0->RXBUF;
+            case 2:{
+                EUSCI_B0->TXBUF = tx_data;
+                counter++;
+                break;
             }
+            case 3:{
+                EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTP;
+                EUSCI_B0->IFG &= ~EUSCI_B_IFG_TXIFG;
+                break;
+            }
+            case 4:{
+                if(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0){
+                    EUSCI_B0->TXBUF = tx_addr;
+                    counter++;
+                }
+                break;
+            }
+            case 5:{
+                if(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG0){
+                    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTP;
+                    EUSCI_B0->IFG &= ~EUSCI_B_IFG_TXIFG;
+                }
+                break;
+            }
+            case 6:{
+                if(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG0){
+                    hvalue = EUSCI_B0->RXBUF;
+                }
+                counter++;
+                break;
+            }
+            default:{
+                if(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG0){
+                    lvalue = EUSCI_B0->RXBUF;
+                }
 
-            // Clear RX interrupt flag
-            EUSCI_B0->IFG &= ~ EUSCI_B_IFG_RXIFG0;
-
-            rx_step = "RX_DIST";
-
-            // Wake up on exit from ISR
-            SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
-
-            // Ensures SLEEPONEXIT takes effect immediately
-            __DSB();
-        } else if (strcmp(rx_step, "RX_DIST") == 0) {
-            if (num_of_rx == 0) {
-                hbyte = EUSCI_B0->RXBUF;
-                num_of_rx ++;
-            } else if (num_of_rx == 1) {
-                lbyte = EUSCI_B0->RXBUF;
-                num_of_rx = 0;
-
-                // Clear RX interrupt flag
-                EUSCI_B0->IFG &= ~ EUSCI_B_IFG_RXIFG0;
-
-                num_of_rx = 0;
-
-                // Wake up on exit from ISR
-                SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
-
-                // Ensures SLEEPONEXIT takes effect immediately
-                __DSB();
+                EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_TXSTP;
+                EUSCI_B0->IFG &= ~EUSCI_B_IFG_TXIFG;
+                EUSCI_B0->IFG &= ~EUSCI_B_IFG_RXIFG;
+                break;
             }
         }
     }
