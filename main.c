@@ -6,13 +6,12 @@
  * main.c
  */
 
-char test[2] = {'N', '2'};
-
-char message[2] = {'H', 'i'};
+//char message[25] = {'H', 'e', 'l', 'l', 'o', ' ', 't', 'h', 'e', 'r', 'e', '.', ' ', 'H', 'o', 'w', ' ', 'a', 'r', 'e', ' ', 'y', 'o', 'u', '?'};
+char message[18] = {'J', 'a', 'c', 'k', ' ', 'i', 's', ' ', 'a', ' ', 'g', 'o', 'o', 'd', ' ', 'b', 'o', 'y'};
 
 void main(void)
 {
-	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
+    WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
     CS->KEY = CS_KEY_VAL;                   // Unlock CS module for register access
     CS->CTL0 = 0;                           // Reset tuning parameters
@@ -55,18 +54,36 @@ void main(void)
     // Ensures SLEEPONEXIT occurs immediately
     __DSB();
 
+
+//    EUSCI_A0->TXBUF = '\n';
+////    __no_operation();
+//    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//    while(EUSCI_A0->RXBUF != ':') {
+//        __no_operation();
+//    }
+//    while((UCA0STATW & UCBUSY));
+//                EUSCI_A0->TXBUF = 'R';
+//                while((UCA0STATW & UCBUSY));
+//                EUSCI_A0->TXBUF = 'i';
+//                while((UCA0STATW & UCBUSY));
+//                EUSCI_A0->TXBUF = '.';
+
+
+
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    EUSCI_A0->TXBUF = 'S';
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    EUSCI_A0->TXBUF = 'h';
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    EUSCI_A0->TXBUF = 'e';
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    EUSCI_A0->TXBUF = 'e';
+    EUSCI_A0->TXBUF = '\n';
+//    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//    EUSCI_A0->TXBUF = 'h';
+//    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//    EUSCI_A0->TXBUF = 'e';
+//    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//    EUSCI_A0->TXBUF = 'e';
 
     // Enter LPM0
     __sleep();
     __no_operation();                       // For debugger
+
+    while(1);
 }
 
 // UART interrupt service routine
@@ -84,12 +101,21 @@ void EUSCIA0_IRQHandler(void)
         if (character == ':') {
             while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
             EUSCI_A0->TXBUF = 'S';
-            while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-            EUSCI_A0->TXBUF = 'h';
-            while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-            EUSCI_A0->TXBUF = 'e';
-            while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-            EUSCI_A0->TXBUF = 'e';
+            int i = 0;
+            for(i = 0; i < sizeof(message); i++) {
+                while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+                EUSCI_A0->TXBUF = message[i];
+            }
+            EUSCI_A0->TXBUF = '\n';
+//            while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//            EUSCI_A0->TXBUF = 'S';
+//            while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//            EUSCI_A0->TXBUF = 'h';
+//            while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//            EUSCI_A0->TXBUF = 'i';
+//            while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+//            EUSCI_A0->TXBUF = '.';
         }
+        EUSCI_A0->IFG &= ~EUSCI_A_IFG_RXIFG;
     }
 }
