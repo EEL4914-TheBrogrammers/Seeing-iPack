@@ -12,15 +12,15 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - [x] Get distance readings from ultrasonic sensor
 	- [x] Get time reading from sensor
 	- [x] Calculate distance from time and speed of sound
-- [ ] Get distance and signal strength from LiDAR sensor
+- [x] Get distance and signal strength from LiDAR sensor
 - [x] Start computer vision
-- [ ] Start guiding algorithm
+- [x] Start guiding algorithm
 - [x] Start designing PCB
 
 # Research Topics
 - [x] Canny Edge Detection
-- [ ] Use for neural networks
-- [ ] Lane detection for vehicles
+- [x] Use for neural networks
+- [x] Lane detection for vehicles
 - [x] Spec sheets for each component
 
 <!-- # 2/8/19 Weekly Meeting
@@ -57,3 +57,14 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **Completed:** Microcontroller PCB v1 (Ultrasonic header, Raspberry Pi header, LiDAR header, microcontroller, IC conversion from 5V to 3.3V).
 - **In progress:** Setting up Emic2 TTS. Able to run TTS successfully using UART on DAD. Debugging UART code for MSP432.
 - **In progress:** Setting up Garmin LiDAR Lite v3. Debugging I2C code for MSP432.
+
+# 3/15/19 Weekly Meeting
+## Tasks
+- **Completed:** Interfacing Emic2 TTS with MSP432 via UART.
+- **Completed:** Interfacing LiDAR Lite V3 with MSP432 via I2C.
+- **Completed:** Having 3 ultrasonic sensors run in succession.
+- **Completed:** Measuring LiDAR range (length)
+- **Completed:** Ordered PCBs for both the MSP432 circuit and Ultrasonic breakout board.
+- **In progress:** Combining ultrasonic sensor, LiDAR, and TTS with reduced lag between every sweep over all devices.
+- **In progress:** Sidewalk lane detection algorithm on Raspberry Pi.
+- **In progress:** Drafting the rechargeable battery pack circuit.
