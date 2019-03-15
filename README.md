@@ -63,8 +63,7 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **Completed:** Interfacing Emic2 TTS with MSP432 via UART.
 - **Completed:** Interfacing LiDAR Lite V3 with MSP432 via I2C.
 - **Completed:** Having 3 ultrasonic sensors run in succession.
-- **Completed:** Measuring LiDAR range (length)
+- **Completed:** Measuring LiDAR range (length).
 - **Completed:** Ordered PCBs for both the MSP432 circuit and Ultrasonic breakout board.
 - **In progress:** Combining ultrasonic sensor, LiDAR, and TTS with reduced lag between every sweep over all devices.
 - **In progress:** Sidewalk lane detection algorithm on Raspberry Pi.
-- **In progress:** Drafting the rechargeable battery pack circuit.
