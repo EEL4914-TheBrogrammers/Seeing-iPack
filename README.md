@@ -67,3 +67,13 @@ Backpack for the visually impaired. Through the use of ultrasonic sensors, LiDAR
 - **Completed:** Ordered PCBs for both the MSP432 circuit and Ultrasonic breakout board.
 - **In progress:** Combining ultrasonic sensor, LiDAR, and TTS with reduced lag between every sweep over all devices.
 - **In progress:** Sidewalk lane detection algorithm on Raspberry Pi.
+
+# 3/20/19 Weekly Meeting
+## Tasks
+- **Completed:** Fixed Emic2 TTS issues: Old phrase would replay after programming a new phrase.
+- **Completed:** Fixed Ultrasonic sensor issues: Polling the 3 ultrasonic sensors resulted in a lagging response.
+- **Completed:** Fixed LiDAR code so that it gets distance measurements faster.
+- **Completed:** Set up and tested vibration motors inside a strap.
+- **In progress:** Combining ultrasonic sensor, LiDAR, and TTS with reduced lag between every sweep over all devices.
+- **In progress:** Sidewalk lane detection algorithm on Raspberry Pi.
+- **In progress:** Waiting for PCBs to arrive.
