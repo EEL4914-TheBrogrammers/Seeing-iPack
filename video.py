@@ -45,7 +45,7 @@ while True:
 		# and construct the zeros array
 		(h, w) = frame.shape[:2]
 		writer = cv2.VideoWriter(args["output"], fourcc, args["fps"],
-			(w * 2, h * 2), True)
+			(w, h), True)
 		zeros = np.zeros((h, w), dtype="uint8")
 
 	# break the image into its RGB components, then construct the
