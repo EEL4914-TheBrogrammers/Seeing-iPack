@@ -59,8 +59,8 @@ while True:
 	# at the top-left, the red channel in the top-right, the green
 	# channel in the bottom-right, and the blue channel in the
 	# bottom-left
-	output = np.zeros((h * 2, w * 2, 3), dtype="uint8")
-	output[0:h * 2, 0:w * 2] = frame
+	output = np.zeros((h, w, 3), dtype="uint8")
+	output[0:h, 0:w] = frame
 
 	# write the output frame to file
 	writer.write(output)
