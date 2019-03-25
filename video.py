@@ -60,10 +60,7 @@ while True:
 	# channel in the bottom-right, and the blue channel in the
 	# bottom-left
 	output = np.zeros((h * 2, w * 2, 3), dtype="uint8")
-	output[0:h, 0:w] = frame
-	output[0:h, w:w * 2] = R
-	output[h:h * 2, w:w * 2] = G
-	output[h:h * 2, 0:w] = B
+	output[0:h * 2, 0:w * 2] = frame
 
 	# write the output frame to file
 	writer.write(output)
