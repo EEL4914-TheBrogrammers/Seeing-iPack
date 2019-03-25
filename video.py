@@ -1,31 +1,84 @@
 # import the necessary packages
-from picamera.array import PiRGBArray
-from picamera import PiCamera
+from __future__ import print_function
+from imutils.video import VideoStream
+import numpy as np
+import argparse
+import imutils
 import time
 import cv2
 
-# initialize the camera and grab a reference to the raw camera capture
-camera = PiCamera()
-camera.resolution = (640, 480)
-camera.framerate = 32
-rawCapture = PiRGBArray(camera, size=(640, 480))
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-o", "--output", required=True,
+	help="path to output video file")
+ap.add_argument("-p", "--picamera", type=int, default=-1,
+	help="whether or not the Raspberry Pi camera should be used")
+ap.add_argument("-f", "--fps", type=int, default=20,
+	help="FPS of output video")
+ap.add_argument("-c", "--codec", type=str, default="MJPG",
+	help="codec of output video")
+args = vars(ap.parse_args())
 
-# allow the camera to warmup
-time.sleep(0.1)
+# initialize the video stream and allow the camera
+# sensor to warmup
+print("[INFO] warming up camera...")
+vs = VideoStream(usePiCamera=args["picamera"] > 0).start()
+time.sleep(2.0)
 
-# capture frames from the camera
-for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-	# grab the raw NumPy array representing the image, then initialize the timestamp
-	# and occupied/unoccupied text
-	image = frame.array
+# initialize the FourCC, video writer, dimensions of the frame, and
+# zeros array
+fourcc = cv2.VideoWriter_fourcc(*args["codec"])
+writer = None
+(h, w) = (None, None)
+zeros = None
 
-	# show the frame
-	cv2.imshow("Frame", image)
+# loop over frames from the video stream
+while True:
+	# grab the frame from the video stream and resize it to have a
+	# maximum width of 300 pixels
+	frame = vs.read()
+	frame = imutils.resize(frame, width=300)
+
+	# check if the writer is None
+	if writer is None:
+		# store the image dimensions, initialize the video writer,
+		# and construct the zeros array
+		(h, w) = frame.shape[:2]
+		writer = cv2.VideoWriter(args["output"], fourcc, args["fps"],
+			(w * 2, h * 2), True)
+		zeros = np.zeros((h, w), dtype="uint8")
+
+	writer.write(frame)
+
+	# show the frames
+	cv2.imshow("Frame", frame)
+	cv2.imshow("Output", output)
 	key = cv2.waitKey(1) & 0xFF
-
-	# clear the stream in preparation for the next frame
-	rawCapture.truncate(0)
 
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
 		break
+
+# do a bit of cleanup
+print("[INFO] cleaning up...")
+cv2.destroyAllWindows()
+vs.stop()
+writer.release()
+
+# stream = io.BytesIO()
+# cam = picamera.PiCamera() 
+# cam.resolution = (1024, 768)
+
+# while True:
+
+#     cam.capture(stream, use_video_port=True, resize=(110,80), format='jpeg')
+#     stream.seek(0)
+#     data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+#     frame = cv2.imdecode(data, 1)
+
+#     cv2.imshow('V', frame)
+#     if cv2.waitKey(1) == 27: # escape key exits
+#         break
+
+# cam.close()
+# cv2.destroyAllWindows()
