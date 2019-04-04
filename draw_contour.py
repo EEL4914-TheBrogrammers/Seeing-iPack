@@ -134,7 +134,7 @@ def mask_imgs(img_og, img_thresh_1, img_thresh_2):
 
 	return target
 
-def draw_contour_main(img_og):
+def draw_contour_main_realtime(img_og):
 	img_blur = blur_img(img_og)		# Blur image by convolving with kernel
 
 	# Threshold image
@@ -143,77 +143,49 @@ def draw_contour_main(img_og):
 
 	# Draw contour lines
 	img_contour = draw_contour(img_threshold_1, img_blur, RED)
-	# plt.imshow(img_contour)
-	# plt.show()
 
 	# Threshold contoured image
 	output_img = threshold_contour_img(img_contour)
-	# plt.imshow(output_img)
-	# plt.show()
 
 	return img_og, output_img
 
-# def draw_contour_main(dir_path, in_fname):
-# 	out_fname_bw = 'bw_contour_' + in_fname
-# 	out_fname_color = 'color_contour_' + in_fname
-# 	out_fname_thresh = 'thresh_' + in_fname
+def draw_contour_main(dir_path, in_fname):
+	out_fname_bw = 'bw_contour_' + in_fname
+	out_fname_color = 'color_contour_' + in_fname
+	out_fname_thresh = 'thresh_' + in_fname
 
-# 	# Image preprocessing
-# 	img_og = cv2.imread(dir_path + in_fname)	# Load sidewalk image
+	# Image preprocessing
+	img_og = cv2.imread(dir_path + in_fname)	# Load sidewalk image
 
-# 	img_blur = blur_img(img_og)		# Blur image by convolving with kernel
+	img_blur = blur_img(img_og)		# Blur image by convolving with kernel
 
-# 	# Threshold image
-# 	H, S, V = find_HSV(img_blur, ROI_H_LOW, ROI_H_HIGH, ROI_W_LOW, ROI_W_HIGH)	# Find HSV values for sidewalk
-# 	img_threshold_1 = threshold_img(img_blur, H, S, V)
+	# Threshold image
+	H, S, V = find_HSV(img_blur, ROI_H_LOW, ROI_H_HIGH, ROI_W_LOW, ROI_W_HIGH)	# Find HSV values for sidewalk
+	img_threshold_1 = threshold_img(img_blur, H, S, V)
 
-# 	# H, S, V = find_HSV(img_blur, ROI_H_LOW_2, ROI_H_HIGH_2, ROI_W_LOW_2, ROI_W_HIGH_2)
-# 	# img_threshold_2 = threshold_img(img_blur, H, S, V)
+	# H, S, V = find_HSV(img_blur, ROI_H_LOW_2, ROI_H_HIGH_2, ROI_W_LOW_2, ROI_W_HIGH_2)
+	# img_threshold_2 = threshold_img(img_blur, H, S, V)
 
-# 	# H, S, V = find_HSV(img_blur, ROI_H_LOW_2+20, ROI_H_HIGH_2+20, ROI_W_LOW_2, ROI_W_HIGH_2)
-# 	# img_threshold_3 = threshold_img(img_blur, H, S, V)
+	# H, S, V = find_HSV(img_blur, ROI_H_LOW_2+20, ROI_H_HIGH_2+20, ROI_W_LOW_2, ROI_W_HIGH_2)
+	# img_threshold_3 = threshold_img(img_blur, H, S, V)
 
-# 	# H, S, V = find_HSV(img_blur, ROI_H_LOW_2+40, ROI_H_HIGH_2+40, ROI_W_LOW_2, ROI_W_HIGH_2)
-# 	# img_threshold_4 = threshold_img(img_blur, H, S, V)
+	# img_threshold_masked = mask_imgs(img_blur, img_threshold_1, img_threshold_2)
+	# img_threshold_masked_2 = mask_imgs(img_blur, img_threshold_masked, img_threshold_3)
+	# img_threshold_masked_3 = mask_imgs(img_blur, img_threshold_masked_2, img_threshold_4)
+	# img_threshold_masked_4 = mask_imgs(img_blur, img_threshold_masked_3, img_threshold_5)
 
-# 	# H, S, V = find_HSV(img_blur, ROI_H_LOW_2-40, ROI_H_HIGH_2-40, ROI_W_LOW_2, ROI_W_HIGH_2)
-# 	# img_threshold_5 = threshold_img(img_blur, H, S, V)
+	# Draw contour lines
+	img_contour = draw_contour(img_threshold_1, img_blur, RED)
 
-# 	# H, S, V = find_HSV(img_blur, ROI_H_LOW_2-60, ROI_H_HIGH_2-60, ROI_W_LOW_2, ROI_W_HIGH_2)
-# 	# img_threshold_6 = threshold_img(img_blur, H, S, V)
+	# Threshold contoured image
+	output_img = threshold_contour_img(img_contour)
 
-# 	# img_threshold_masked = mask_imgs(img_blur, img_threshold_1, img_threshold_2)
-# 	# img_threshold_masked_2 = mask_imgs(img_blur, img_threshold_masked, img_threshold_3)
-# 	# img_threshold_masked_3 = mask_imgs(img_blur, img_threshold_masked_2, img_threshold_4)
-# 	# img_threshold_masked_4 = mask_imgs(img_blur, img_threshold_masked_3, img_threshold_5)
-# 	# img_threshold_masked_5 = mask_imgs(img_blur, img_threshold_masked_4, img_threshold_6)
-# 	# plt.imshow(img_threshold_masked)
-# 	# plt.show()
-# 	# plt.imshow(img_threshold_masked_2)
-# 	# plt.show()
-# 	# plt.imshow(img_threshold_masked_3)
-# 	# plt.show()
-# 	# plt.imshow(img_threshold_masked_4)
-# 	# plt.show()
-# 	# plt.imshow(img_threshold_masked_5)
-# 	# plt.show()
+	# Save BW thresholded image and contoured blurred image
+	# scipy.misc.imsave(out_fname_bw, output_img)
+	# scipy.misc.imsave(out_fname_color, img_contour)
+	# scipy.misc.imsave(out_fname_thresh, img_threshold)
 
-# 	# Draw contour lines
-# 	img_contour = draw_contour(img_threshold_1, img_blur, RED)
-# 	# plt.imshow(img_contour)
-# 	# plt.show()
-
-# 	# Threshold contoured image
-# 	output_img = threshold_contour_img(img_contour)
-# 	# plt.imshow(output_img)
-# 	# plt.show()
-
-# 	# Save BW thresholded image and contoured blurred image
-# 	# scipy.misc.imsave(out_fname_bw, output_img)
-# 	# scipy.misc.imsave(out_fname_color, img_contour)
-# 	# scipy.misc.imsave(out_fname_thresh, img_threshold)
-
-# 	return img_og, output_img
+	return img_og, output_img
 
 
 def main():

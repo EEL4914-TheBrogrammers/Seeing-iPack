@@ -24,7 +24,7 @@ def main():
 		out_fname = "realtime/og_img/frame" + str(counter) + ".jpg"
 		cv2.imwrite(out_fname, frame)
 
-		img_og, img_threshold = draw_contour_main(frame)
+		img_og, img_threshold = draw_contour_main_realtime(frame)
 		lane_img = img_pipeline_main(img_og, img_threshold)
 
 		out_fname = "realtime/processed_img/frame" + str(counter) + ".jpg"
