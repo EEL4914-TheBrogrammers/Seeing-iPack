@@ -26,7 +26,8 @@ def define_perspective_points(img):
     # src_pts = np.float32([[(w/2)-390, (h/2)],[(w/8), h],[(w*7/8), h],[(w/2)+390, (h/2)]])
     # dst_pts = np.float32([[w/4, 0],[w/4, h],[w*3/4, h],[w*3/4, 0]])
 
-    src_pts = np.float32([[(w*2/8), (h/2)],[10, h],[1270, h],[(w*6/8), (h/2)]])
+#    src_pts = np.float32([[(w*2/8), (h/2)],[10, h],[1270, h],[(w*6/8), (h/2)]])
+    src_pts = np.float32([[(w*2/8), (h/2)],[2, h],[254, h],[(w*6/8), (h/2)]])
     dst_pts = np.float32([[w/4, 0],[w/4, h],[w*3/4, h],[w*3/4, 0]])
 
     return src_pts, dst_pts
@@ -95,7 +96,7 @@ def find_lines(img_warp):
     rightx_current = rightx_base
     
     # Set the width of the windows +/- margin
-    margin = 30
+    margin = 5
     # Set minimum number of pixels found to recenter window
     minpix = 50
     # Create empty lists to receive left and right lane pixel indices

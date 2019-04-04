@@ -36,7 +36,7 @@ def main():
 
 		# Draw contours on image
 		img_og, img_threshold = draw_contour_main(dir_path, in_fname + str(i) + ".jpg")
-	
+
 		lane_img = img_pipeline_main(img_og, img_threshold)
 
 		# plt.imshow(lane_img)
