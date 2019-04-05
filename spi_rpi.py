@@ -16,6 +16,9 @@ def alert(side):
 	elif side == "right":
 		spi.xfer([0x31])
 		spi.xfer([0x0a])
+	elif side == "start":
+		spi.xfer([0x32])
+		spi.xfer([0x0a])
 
 def main():
 	if len(sys.argv) != 2:
