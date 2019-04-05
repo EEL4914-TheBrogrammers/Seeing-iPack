@@ -5,11 +5,12 @@
 """
 import sys
 import cv2
-import scipy.misc
+import time
+#~ import scipy.misc
 import numpy as np
 import matplotlib.pyplot as plt
-import colorsys
-
+from scipy import signal
+from scipy import misc
 
 """
 ====================================================
@@ -20,14 +21,6 @@ RED 	= (255,0,0)
 GREEN 	= (0,255,0)
 BLUE 	= (0,0,255)
 YELLOW 	= (255,255,0)
-
-# ROI[H range, W range]
-ROI_H_LOW, ROI_H_HIGH = 690, 720
-ROI_W_LOW, ROI_W_HIGH = 560, 720
-
-# ROI[H range, W range]
-ROI_H_LOW_2, ROI_H_HIGH_2 = 500, 600 
-ROI_W_LOW_2, ROI_W_HIGH_2 = 600, 680
 
 shadow = (68,78,90)
 
@@ -47,11 +40,22 @@ shadow_higher = np.array([shadow_H+70, shadow_S+70, shadow_V+70])		# Determine h
 =================== Functions ======================
 ====================================================
 """
+
 # Image preprocessing with blurring
 def blur_img(img):
-	kernel = np.ones((100,100),np.float32)/10000	# Conv matrix for blurring the image
-
-	img_blur = cv2.filter2D(img,-1,kernel)		# Convolve kernel with sidewalk image
+	#~ Time = 0.83
+	#~ start = time.time() 
+	#~ kernel = np.ones((5,5),np.float32)/25	# Conv matrix for blurring the image
+	#~ img_blur = cv2.filter2D(img, -1, kernel)		# Convolve kernel with sidewalk image
+	#~ print ("2D Convolution Time: ", time.time() - start)
+	
+	#~ Time = 0.2
+	#~ start = time.time()
+	#~ img_blur1 = cv2.GaussianBlur(img, (5,5), 0)
+	#~ print ("2D Convolution Time: ", time.time() - start)
+	
+	#~ Time = 0.1
+	img_blur = cv2.blur(img, (200, 200))
 
 	return img_blur
 
@@ -135,19 +139,37 @@ def mask_imgs(img_og, img_thresh_1, img_thresh_2):
 	return target
 
 def draw_contour_main_realtime(img_og):
-	img_blur = blur_img(img_og)		# Blur image by convolving with kernel
+	height, width = img_og.shape[:2]
+	
+	# ROI boundaries
+	ROI_H_LOW, ROI_H_HIGH = int(height - 15), height
+	ROI_W_LOW, ROI_W_HIGH = int(width/2 - 10), int(width/2 + 10)
+	
+	# Blur image by convolving with kernel
+	start = time.time()
+	img_blur = blur_img(img_og)
+	print ("Blurring Image: " + str(time.time() - start))
 
 	# Threshold image
+	start = time.time()
 	H, S, V = find_HSV(img_blur, ROI_H_LOW, ROI_H_HIGH, ROI_W_LOW, ROI_W_HIGH)	# Find HSV values for sidewalk
+	print ("Finding Image HSV: " + str(time.time() - start))
+	
+	start = time.time()
 	img_threshold_1 = threshold_img(img_blur, H, S, V)
-
+	print ("Thresholding Image: " + str(time.time() - start))
+	
 	# Draw contour lines
+	start = time.time()
 	img_contour = draw_contour(img_threshold_1, img_blur, RED)
+	print ("Drawing Contour on Image: " + str(time.time() - start))
 
 	# Threshold contoured image
+	start = time.time()
 	output_img = threshold_contour_img(img_contour)
+	print ("Thresholding Contoured Image: " + str(time.time() - start))
 
-	return img_og, output_img
+	return output_img
 
 def draw_contour_main(dir_path, in_fname):
 	out_fname_bw = 'bw_contour_' + in_fname

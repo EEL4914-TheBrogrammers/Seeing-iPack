@@ -27,7 +27,7 @@ def define_perspective_points(img):
     # dst_pts = np.float32([[w/4, 0],[w/4, h],[w*3/4, h],[w*3/4, 0]])
 
 #    src_pts = np.float32([[(w*2/8), (h/2)],[10, h],[1270, h],[(w*6/8), (h/2)]])
-    src_pts = np.float32([[(w*2/8), (h/2)],[2, h],[254, h],[(w*6/8), (h/2)]])
+    src_pts = np.float32([[(w*2/8), (h/2)],[5, h],[w - 5, h],[(w*6/8), (h/2)]])
     dst_pts = np.float32([[w/4, 0],[w/4, h],[w*3/4, h],[w*3/4, 0]])
 
     return src_pts, dst_pts
@@ -96,7 +96,7 @@ def find_lines(img_warp):
     rightx_current = rightx_base
     
     # Set the width of the windows +/- margin
-    margin = 5
+    margin = 7
     # Set minimum number of pixels found to recenter window
     minpix = 50
     # Create empty lists to receive left and right lane pixel indices
@@ -185,11 +185,6 @@ def find_lines(img_warp):
     cv2.fillPoly(window_img, np.int_([right_line_pts]), (0,255, 0))
 
     result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
-    # plt.imshow(result)
-    # plt.plot(left_fitx, ploty, color='yellow')
-    # plt.plot(right_fitx, ploty, color='yellow')
-    # plt.xlim(0, 1280)
-    # plt.ylim(720, 0)
 
     out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
     out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
@@ -231,16 +226,11 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
     
     # Superimpose on the original image
     result = cv2.addWeighted(img, 1, new_warp, 0.3, 0)
-    # curv_text = "Mean radius of lane curvature: " + '{:6.2f}'.format(mean_curverad)
     center_text = 'Position: ' + '{:6.2f}'.format(position) + ' m'
-    # cv2.putText(result, curv_text,(30, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.7, (255, 255, 255), 3)
     if position < (-0.35) or position > (0.35):
     	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 3)
     else:
     	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (255, 255, 255), 3)
-    t = time.localtime()
-    timestamp = time.strftime('%b %d %Y %H:%M', t)
-    cv2.putText(result, timestamp,(30, 280), cv2.FONT_HERSHEY_SIMPLEX, .9, (255, 255, 255), 3)
 
     return result
 
