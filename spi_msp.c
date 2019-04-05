@@ -35,3 +35,23 @@ void spi_interrupt_init(){
     // Enable eUSCI_B0 interrupt in NVIC module
     NVIC->ISER[0] = 1 << ((EUSCIB0_IRQn) & 31); // Enable interrupts
 }
+
+void EUSCIB0_IRQHandler() {
+    char value = UCB0RXBUF >> 1;
+
+    if (value == '\n') {
+        if (strncmp(cmdbuf, "0", 1) == 0) {         // Left trigger
+            P5OUT |= BIT4;
+            P5OUT &= ~BIT5;
+        } else if (strncmp(cmdbuf, "1", 1) == 0){   // Right trigger
+            P5OUT |= BIT5;
+            P5OUT &= ~BIT4;
+        }
+        cmd_index = 0;
+    } else {
+        cmdbuf[cmd_index] = value;
+        cmd_index++;
+    }
+
+    while (!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG));
+}
