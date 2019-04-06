@@ -202,35 +202,45 @@ def invert_perspective(img, src_pts, dst_pts, img_size):
 
 def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad, position):    
 	height,width = img.shape[0],img.shape[1]
-		
+
+	start = time.time()
 	ploty = np.linspace(0, height-1, num=height)
 	left_fitx = l_fit[0]*ploty**2 + l_fit[1]*ploty + l_fit[2]
 	right_fitx = r_fit[0]*ploty**2 + r_fit[1]*ploty + r_fit[2]
+	print ("1: " + str(time.time() - start))
 
 	# Prepare x, y points into cv2.fillPoly() format
+	start = time.time()
 	pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
 	pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
 	pts = np.hstack((pts_left, pts_right))
+	print ("2: " + str(time.time() - start))
 
 	# Fill the lane region on lane_area
+	start = time.time()
 	lane_area =  np.zeros_like(img).astype(np.uint8)
 	if position < (-0.35) or position > (0.35):
 		cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
 	else:
 		cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
-	cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=15)
-	cv2.polylines(lane_area, np.int32([pts_right]), isClosed=False, color=(255,20,147), thickness=15)
+	cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=5)
+	cv2.polylines(lane_area, np.int32([pts_right]), isClosed=False, color=(255,20,147), thickness=5)
+	print ("3: " + str(time.time() - start))
 		
 	# Warp the filled lane back to original image space using inverse perspective matrix
-	new_warp = cv2.warpPerspective(lane_area, inv_matrix, (width, height)) 
+	start = time.time()
+	new_warp = cv2.warpPerspective(lane_area, inv_matrix, (width, height))
+	print ("4: " + str(time.time() - start))
 	
 	# Superimpose on the original image
+	start = time.time()
 	result = cv2.addWeighted(img, 1, new_warp, 0.3, 0)
 	center_text = 'Position: ' + '{:6.2f}'.format(position) + ' m'
 	if position < (-0.35) or position > (0.35):
 		cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 3)
 	else:
 		cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (255, 255, 255), 3)
+	print ("5: " + str(time.time() - start))
 
 	return result
 
