@@ -80,7 +80,7 @@ def find_lines(img_warp):
 	rightx_base = np.argmax(histogram[midpoint:]) + midpoint	# Max of right half
 
 	# Choose the number of sliding windows
-	nwindows = 30
+	nwindows = 20
 	
 	# Set height of windows
 	window_height = np.int(img_warp.shape[0]/nwindows)

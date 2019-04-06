@@ -55,7 +55,7 @@ def blur_img(img):
 	#~ print ("2D Convolution Time: ", time.time() - start)
 	
 	#~ Time = 0.1
-	img_blur = cv2.blur(img, (200, 200))
+	img_blur = cv2.blur(img, (100, 100))
 
 	return img_blur
 
