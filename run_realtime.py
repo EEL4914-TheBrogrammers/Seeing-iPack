@@ -103,7 +103,7 @@ def main():
 		# plt.show()
 
 		img_array.append(lane_img)
-		print ("Single Frame Processing Time: " + str(time.time() - start_single_frame + "\n"))
+		print ("Single Frame Processing Time: " + str(time.time() - start_single_frame) + "\n")
 	print ("\nTotal time: " + str(time.time() - start_all))
 
 	img = cv2.imread(dir_path + "frame1.jpg")
