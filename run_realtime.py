@@ -86,6 +86,7 @@ def main():
 
 	start_all = time.time()
 	for i in range(num_files):
+		start_single_frame = time.time()
 		print (i)
 
 		# Draw contours on image
@@ -102,6 +103,7 @@ def main():
 		# plt.show()
 
 		img_array.append(lane_img)
+		print ("\nSingle Frame Processing Time: " + str(time.time() - start_single_frame))
 	print ("\nTotal time: " + str(time.time() - start_all))
 
 	img = cv2.imread(dir_path + "frame1.jpg")
