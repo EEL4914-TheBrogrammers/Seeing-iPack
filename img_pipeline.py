@@ -239,7 +239,7 @@ def img_pipeline_main(img_og, img_threshold):
 
     start = time.time()
 	src_pts, dst_pts = define_perspective_points(img_og)
-    print ("Defining Perspective Points: " + str(time.time() - start))
+    print ("Defining Perspective: " + str(time.time() - start))
 
 	# Warp image to transform perspective
     start = time.time()
