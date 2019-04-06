@@ -96,7 +96,7 @@ def find_lines(img_warp):
     rightx_current = rightx_base
     
     # Set the width of the windows +/- margin
-    margin = 7
+    margin = 10
     # Set minimum number of pixels found to recenter window
     minpix = 50
     # Create empty lists to receive left and right lane pixel indices
