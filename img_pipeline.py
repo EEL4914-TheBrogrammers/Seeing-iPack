@@ -96,7 +96,7 @@ def find_lines(img_warp):
 	rightx_current = rightx_base
 	
 	# Set the width of the windows +/- margin
-	margin = 10
+	margin = 5
 	# Set minimum number of pixels found to recenter window
 	minpix = 50
 	# Create empty lists to receive left and right lane pixel indices
@@ -235,11 +235,11 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 	# Superimpose on the original image
 	start = time.time()
 	result = cv2.addWeighted(img, 1, new_warp, 0.3, 0)
-	center_text = 'Position: ' + '{:6.2f}'.format(position) + ' m'
-	if position < (-0.35) or position > (0.35):
-		cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 3)
-	else:
-		cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (255, 255, 255), 3)
+	# center_text = 'Position: ' + '{:6.2f}'.format(position) + ' m'
+	# if position < (-0.35) or position > (0.35):
+	# 	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 3)
+	# else:
+	# 	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (255, 255, 255), 3)
 	print ("5: " + str(time.time() - start))
 
 	return result
@@ -261,7 +261,7 @@ def img_pipeline_main(img_og, img_threshold):
 	# Find lines
 	start = time.time()
 	left_fit, right_fit, lines_img, mean_curverad, position = find_lines(warp_img)
-	print ("Fine Lines: " + str(time.time() - start))
+	print ("Find Lines: " + str(time.time() - start))
 
 	# Unwarp transformed perspective image
 	start = time.time()
