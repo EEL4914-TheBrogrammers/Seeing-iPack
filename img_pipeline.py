@@ -237,22 +237,32 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 def img_pipeline_main(img_og, img_threshold):
 	img_size = (img_threshold.shape[1], img_threshold.shape[0])
 
+    start = time.time()
 	src_pts, dst_pts = define_perspective_points(img_og)
+    print ("Defining Perspective Points: " + str(time.time() - start))
 
 	# Warp image to transform perspective
+    start = time.time()
 	warp_img = perspective_transformation(img_threshold, src_pts, dst_pts, img_size)
+    print ("Warp Image: " + str(time.time() - start))
 	# plt.imshow(warp_img)
 	# plt.show()
 
 	# Find lines
+    start = time.time()
 	left_fit, right_fit, lines_img, mean_curverad, position = find_lines(warp_img)
+    print ("Fine Lines: " + str(time.time() - start))
 
 	# Unwarp transformed perspective image
+    start = time.time()
 	inv_matrix, unwarp_img = invert_perspective(warp_img, src_pts, dst_pts, img_size)
+    print ("Unwarp Image: " + str(time.time() - start))
 	# plt.imshow(unwarp_img)
 	# plt.show()
 
+    start = time.time()
 	lane_img = superimpose_lane_area(img_og, warp_img, left_fit, right_fit, inv_matrix, mean_curverad, position)
+    print ("Superimpose Lane Area: " + str(time.time() - start))
 	# plt.imshow(lane_img)
 	# plt.show()
 
