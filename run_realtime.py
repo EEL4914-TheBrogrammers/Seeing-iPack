@@ -69,10 +69,8 @@ def main():
 
 	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 20, (1280, 720))
 
-	for i in range(num_files):
-		print(i)
-		img_loaded = cv2.imread(dir_path + "/" + "frame" + str(i) + ".jpg")
-		video.write(img_loaded)
+	for i in processed_buffer:
+		video.write(i)
 
 	cv2.destroyAllWindows()
 	video.release()
