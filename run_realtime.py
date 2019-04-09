@@ -55,7 +55,7 @@ def main():
 		
 		processed_buffer.append(lane_img)
 		
-		if counter == 200:
+		if counter == 100:
 			break
 			
 		counter += 1
@@ -63,7 +63,7 @@ def main():
 	
 	cv2.VideoCapture(0).release()
 	
-	dir_path = "video_frames"
+	dir_path = "realtime/processed_img"
 	dir_list = os.listdir(dir_path)
 	num_files = len(dir_list)
 
