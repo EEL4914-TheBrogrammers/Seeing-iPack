@@ -28,8 +28,11 @@ void ultra_init(void) {
     P2DIR &= ~BIT6 + ~BIT5 + ~BIT4; // Echo pin (L, R)
     P2SEL0 |= BIT6 + BIT5 + BIT4;
 
-    bound = 7;
-    samples = 5;
+    bound = 14;
+    side_bound = 7;
+    samples = 1;
+    sent = 0;
+    counttt = 0;
     speakL = false;
     speakM = false;
     speakR = false;
@@ -42,54 +45,112 @@ void ultra_init(void) {
 }
 
 void ultra_sensors(void) {
-    Timer_initL();
-    if (sensor == LEFT) {
-        P2OUT |= BIT7;              // Assert echo
-        __delay_cycles(10);         // 10us wide
-        P2OUT &= ~BIT7;             // Deassert
-    } else if (sensor == MIDDLE) {
-        P2OUT |= BIT3;              // Assert echo
-        __delay_cycles(10);         // 10us wide
-        P2OUT &= ~BIT3;             // Deassert
-    } else if (sensor == RIGHT) {
-        P2OUT |= BIT2;              // Assert echo
-        __delay_cycles(10);         // 10us wide
-        P2OUT &= ~BIT2;             // Deassert
+    while (counttt < 3){
+        Timer_initL();
+        if (sensor == LEFT) {
+            if (sent == 0) {
+                P2OUT |= BIT7;              // Assert echo
+                __delay_cycles(120);        // 10us wide
+                P2OUT &= ~BIT7;             // Deassert
+                sent = 1;
+            } else if(sent == 1) {
+                __delay_cycles(400);
+                sent = 0;
+            }
+        } else if (sensor == MIDDLE) {
+            if (sent == 0) {
+                P2OUT |= BIT3;              // Assert echo
+                __delay_cycles(120);        // 10us wide
+                P2OUT &= ~BIT3;             // Deassert
+                sent = 1;
+            } else if(sent == 1) {
+                __delay_cycles(400);
+                sent = 0;
+            }
+        } else if (sensor == RIGHT) {
+            if (sent == 0) {
+                P2OUT |= BIT2;              // Assert echo
+                __delay_cycles(120);        // 10us wide
+                P2OUT &= ~BIT2;             // Deassert
+                sent = 1;
+            } else if(sent == 1) {
+                __delay_cycles(400);
+                sent = 0;
+            }
+        }
     }
+    counttt = 0;
 }
 
+
 void checkBoundaries(void) {
-    if (prev_sensor == LEFT) {              // Left sensor check
-        if(dist <= bound && dist > 0) {     // Motor vibration
-            if(!speakL) {
-                speak("left.");
-                speakL = true;
-            }
+
+    if (left_val < right_val && left_val < middle_val && left_val <= side_bound && left_val > 0) {
+        if(!speakL) {
+            speak("left.");
+            speakL = true;
         } else {
             speakL = false;
         }
     }
-    if (prev_sensor == MIDDLE) {            // Middle sensor check
-        if(dist <= bound && dist > 0) {     // Motor vibration
-            if(!speakM) {
-                speak("middle.");
-                speakM = true;
-             }
-        } else {
-            speakM = false;
-        }
-    }
-    if (prev_sensor == RIGHT) {             // Right sensor check
-        if(dist <= bound && dist > 0) {     // Motor vibration
-            if(!speakR) {
-                speak("right.");
-                speakR = true;
-            }
+
+    if (right_val < left_val && right_val < middle_val && right_val <= side_bound && right_val > 0) {
+        if(!speakR) {
+            speak("right.");
+            speakR = true;
         } else {
             speakR = false;
         }
     }
+
+    if (middle_val < left_val && middle_val < right_val && middle_val <= bound && middle_val > 0) {
+        if(!speakM) {
+            speak("mid.");
+            speakM = true;
+        } else {
+            speakM = false;
+        }
+    }
 }
+
+//void checkBoundaries(void) {
+//    if (prev_sensor == LEFT) {              // Left sensor check
+//        if(dist <= bound && dist > 0) {     // Motor vibration
+//            left_val = dist;
+////            if(!speakL) {
+////                speak("left.");
+////                speakL = true;
+////            }
+//        } else {
+//            speakL = false;
+//            left_val = 200;
+//        }
+//    }
+//    if (prev_sensor == MIDDLE) {            // Middle sensor check
+//        if(dist <= bound && dist > 0) {     // Motor vibration
+//            middle_val = dist;
+////            if(!speakM) {
+////                speak("middle.");
+////                speakM = true;
+////             }
+//        } else {
+//            speakM = false;
+//            middle_val = 200;
+//        }
+//    }
+//    if (prev_sensor == RIGHT) {             // Right sensor check
+//        if(dist <= bound && dist > 0) {     // Motor vibration
+//            right_val = dist;
+////            if(!speakR) {
+////                speak("right.");
+////                speakR = true;
+////            }
+//        } else {
+//            speakR = false;
+//            right_val = 200;
+//        }
+//    }
+//}
 
 void average(void) {
     unsigned int distance;
@@ -110,16 +171,19 @@ void average(void) {
         sum = 0;
 
         if (sensor == LEFT) {
+            left_val = dist;
             TA0CCTL3 &= ~CCIE;  // Disable interrupt left sensor
             sensor = MIDDLE;
             prev_sensor = LEFT;
             Timer_initM();      // Initialize timer for middle sensor
         } else if (sensor == MIDDLE) {
+            middle_val = dist;
             TA0CCTL2 &= ~CCIE;  // Disable interrupt right sensor
             sensor = RIGHT;
             prev_sensor = MIDDLE;
             Timer_initR();      // Initialize timer for right sensor
         } else if (sensor == RIGHT) {
+            right_val = dist;
             TA0CCTL1 &= ~CCIE;  // Disable interrupt right sensor
             sensor = LEFT;
             prev_sensor = RIGHT;
@@ -135,7 +199,9 @@ void TA0_N_IRQHandler(void) {
         if (TA0CCTL3 & CCI) {       // Rising edge
             up_counter = TA0CCR3;   // Copy counter to variable
         } else {                    // Falling edge
+            sent = 0;
             average();
+            counttt++;
             TA0R = 0;
         }
         TA0CCTL3 &= ~CCIFG;         // Clear interrupt flag - handled
@@ -143,7 +209,9 @@ void TA0_N_IRQHandler(void) {
         if (TA0CCTL2 & CCI) {       // Rising edge
             up_counter = TA0CCR2;   // Copy counter to variable
         } else {                    // Falling edge
+            sent = 0;
             average();
+            counttt++;
             TA0R = 0;
         }
         TA0CCTL2 &= ~CCIFG;         // Clear interrupt flag - handled
@@ -151,7 +219,9 @@ void TA0_N_IRQHandler(void) {
         if (TA0CCTL1 & CCI) {       // Rising edge
             up_counter = TA0CCR1;   // Copy counter to variable
         } else {                    // Falling edge
+            sent = 0;
             average();
+            counttt++;
             TA0R = 0;
         }
         TA0CCTL1 &= ~CCIFG;         // Clear interrupt flag - handled

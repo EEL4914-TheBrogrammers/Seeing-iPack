@@ -1,10 +1,12 @@
-#include "msp432p401r.h"
-#include "msp.h"
-#include "tts.h"
-#include "ultrasonic.h"
-#include "lidar.h"
 #include <stdio.h>
 #include <string.h>
+
+#include "msp.h"
+#include "tts.h"
+#include "lidar.h"
+#include "spi_msp.h"
+#include "ultrasonic.h"
+#include "msp432p401r.h"
 #include "msp432p401r_classic.h"
 
 // **************************   NOTES    ******************************
@@ -33,6 +35,17 @@ void main(void) {
 
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
 
+//	go = 0;
+//	spi_init();
+//	spi_interrupt_init();
+//
+//	// Wait for on trigger from RPi
+//	while (1) {
+//	    if (go == 1) {
+//	        break;
+//	    }
+//	}
+
  	speak("Hello. How are you?");
  	ultra_init();   // Initialize ultrasonic sensors
  	float distBABY;
@@ -40,8 +53,10 @@ void main(void) {
 	while(1) {
 	    ultra_sensors();                        // Get ultrasonic distances
 	    checkBoundaries();                      // Check ultrasonic boundaries
-	    distBABY = get_distance("in");          // Get lidar distances
-	    EUSCI_B0->IE &= ~EUSCI_B_IE_RXIE +           // Disable RX and TX interrupt for I2C
-	                ~EUSCI_B_IE_TXIE;
+
+
+//	    distBABY = get_distance("in");          // Get lidar distances
+//	    EUSCI_B0->IE &= ~EUSCI_B_IE_RXIE +           // Disable RX and TX interrupt for I2C
+//	                ~EUSCI_B_IE_TXIE;
 	}
 }
