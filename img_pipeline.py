@@ -81,7 +81,7 @@ def find_lines(img_warp):
 	rightx_base = np.argmax(histogram[midpoint:]) + midpoint	# Max of right half
 
 	# Choose the number of sliding windows
-	nwindows = 40
+	nwindows = 30
 
 	# Set height of windows
 	window_height = np.int(img_warp.shape[0]/nwindows)
@@ -217,12 +217,16 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 
 	if position < (-0.05) or position > (0.05):
 		cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
+		if position < (-0.05):
+			alert("right")
+		if position < (0.05):
+			alert("left")
 	else:
 		alert("start")
 		cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
 
-	cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=5)
-	cv2.polylines(lane_area, np.int32([pts_right]), isClosed=False, color=(255,20,147), thickness=5)
+	# cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=5)
+	# cv2.polylines(lane_area, np.int32([pts_right]), isClosed=False, color=(255,20,147), thickness=5)
 		
 	# Warp the filled lane back to original image space using inverse perspective matrix
 	new_warp = cv2.warpPerspective(lane_area, inv_matrix, (width, height))
