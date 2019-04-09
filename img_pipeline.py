@@ -203,7 +203,7 @@ def invert_perspective(img, src_pts, dst_pts, img_size):
 def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad, position):
 	global alert_left
 	global alert_right
-	
+
 	height,width = img.shape[0],img.shape[1]
 
 	ploty = np.linspace(0, height-1, num=height)
@@ -226,7 +226,7 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 			if alert_right == 1:
 				print ("\n\nALERTING RIGHT\n\n")
 				alert("right")
-		if position > (0.03):
+		elif position > (0.03):
 			alert_right = 0
 			alert_left += 1
 			if alert_right == 1:
