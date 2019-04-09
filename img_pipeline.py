@@ -20,6 +20,10 @@ from spi_rpi import alert
 =================== Functions ======================
 ====================================================
 """
+
+global alert_left
+global alert_right
+
 # Define perspective points
 def define_perspective_points(img):
 	w, h = img.shape[1], img.shape[0]
