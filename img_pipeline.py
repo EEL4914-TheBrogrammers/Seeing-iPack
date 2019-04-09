@@ -100,7 +100,7 @@ def find_lines(img_warp):
 	rightx_current = rightx_base
 	
 	# Set the width of the windows +/- margin
-	margin = 5
+	margin = 10
 	# Set minimum number of pixels found to recenter window
 	minpix = 25
 	# Create empty lists to receive left and right lane pixel indices
@@ -223,7 +223,7 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 	lane_area =  np.zeros_like(img).astype(np.uint8)
 
 	if position < (-0.03) or position > (0.03):
-		# cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
+		cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
 		if position < (-0.03):
 			alert_left = 0
 			alert_right += 1
@@ -233,14 +233,14 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 		elif position > (0.03):
 			alert_right = 0
 			alert_left += 1
-			if alert_right == 1:
+			if alert_left == 1:
 				print ("\n\nALERTING LEFT\n\n")
 				alert("left")
 	else:
 		alert_left = 0
 		alert_right = 0
 		alert("start")
-		# cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
+		cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
 
 	cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=5)
 	cv2.polylines(lane_area, np.int32([pts_right]), isClosed=False, color=(255,20,147), thickness=5)
@@ -250,11 +250,11 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 	
 	# Superimpose on the original image
 	result = cv2.addWeighted(img, 1, new_warp, 0.3, 0)
-	# center_text = 'Position: ' + '{:6.2f}'.format(position) + ' m'
+	center_text = 'Position: ' + '{:6.2f}'.format(position) + ' m'
 	# if position < (-0.35) or position > (0.35):
 	# 	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 3)
 	# else:
-	# 	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (255, 255, 255), 3)
+	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (255, 255, 255), 3)
 
 	return result
 
