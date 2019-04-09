@@ -7,6 +7,7 @@ from img_pipeline import img_pipeline_main
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
+from spi_rpi import alert
 
 #~ def processing():
 	#~ frame = 0
@@ -78,6 +79,7 @@ import time
 
 
 def main():
+	alert("start")
 	dir_path = "bleh/"
 	dir_list = os.listdir(dir_path)
 	num_files = len(dir_list)

@@ -13,6 +13,7 @@ import time
 import os
 import fnmatch
 import shutil
+from spi_rpi import alert
 
 """
 ====================================================
@@ -72,7 +73,7 @@ def find_lines(img_warp):
 	# Create an output image to draw on and  visualize the result
 	out_img = np.dstack((img_warp, img_warp, img_warp))*255
 	window_img = np.zeros_like(out_img)
-	
+
 	# Find the peak of the left and right halves of the histogram
 	# These will be the starting point for the left and right lines
 	midpoint = np.int(histogram.shape[0]/2)
@@ -80,8 +81,8 @@ def find_lines(img_warp):
 	rightx_base = np.argmax(histogram[midpoint:]) + midpoint	# Max of right half
 
 	# Choose the number of sliding windows
-	nwindows = 30
-	
+	nwindows = 40
+
 	# Set height of windows
 	window_height = np.int(img_warp.shape[0]/nwindows)
 	
@@ -95,7 +96,7 @@ def find_lines(img_warp):
 	rightx_current = rightx_base
 	
 	# Set the width of the windows +/- margin
-	margin = 10
+	margin = 5
 	# Set minimum number of pixels found to recenter window
 	minpix = 25
 	# Create empty lists to receive left and right lane pixel indices
@@ -111,11 +112,11 @@ def find_lines(img_warp):
 		win_xleft_high = leftx_current + margin
 		win_xright_low = rightx_current - margin
 		win_xright_high = rightx_current + margin
-		
+
 		# Draw the windows on the visualization image
-		cv2.rectangle(out_img,(win_xleft_low,win_y_low),(win_xleft_high,win_y_high),(255,255,0), 2)		# Left yellow
-		cv2.rectangle(out_img,(win_xright_low,win_y_low),(win_xright_high,win_y_high),(0,255,255), 2)	# Right blue 
-		
+		#cv2.rectangle(out_img,(win_xleft_low,win_y_low),(win_xleft_high,win_y_high),(255,255,0), 2)		# Left yellow
+		#cv2.rectangle(out_img,(win_xright_low,win_y_low),(win_xright_high,win_y_high),(0,255,255), 2)	# Right blue 
+
 		# plt.imshow(out_img)
 		# plt.show()
 
@@ -180,8 +181,8 @@ def find_lines(img_warp):
 	right_line_pts = np.hstack((right_line_window1, right_line_window2))
 
 	# Draw the lane onto the warped blank image
-	cv2.fillPoly(window_img, np.int_([left_line_pts]), (0,255, 0))
-	cv2.fillPoly(window_img, np.int_([right_line_pts]), (0,255, 0))
+	#cv2.fillPoly(window_img, np.int_([left_line_pts]), (0,255, 0))
+	#cv2.fillPoly(window_img, np.int_([right_line_pts]), (0,255, 0))
 
 	result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
 
@@ -213,10 +214,13 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 
 	# Fill the lane region on lane_area
 	lane_area =  np.zeros_like(img).astype(np.uint8)
-	# if position < (-0.35) or position > (0.35):
-	# 	cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
-	# else:
-	# 	cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
+
+	if position < (-0.05) or position > (0.05):
+	    cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
+        else:
+            alert("start")
+            cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
+
 	cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=5)
 	cv2.polylines(lane_area, np.int32([pts_right]), isClosed=False, color=(255,20,147), thickness=5)
 		
