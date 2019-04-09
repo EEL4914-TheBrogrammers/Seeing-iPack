@@ -63,7 +63,7 @@ def main():
 	
 	cv2.VideoCapture(0).release()
 
-	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 20, (1280, 720))
+	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 20, (640, 368))
 
 	for i in range(len(processed_buffer)):
 		video.write(processed_buffer[i])
