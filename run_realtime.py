@@ -49,6 +49,10 @@ def main():
 		
 		rawCapture.seek(0)
 		rawCapture.truncate()
+
+		print (image.shape)
+		img_og = cv2.imread("bleh/frame1.jpg")
+		print (img_og.shape)
 		
 		img_og, img_threshold = draw_contour_main_realtime(image)
 		lane_img = img_pipeline_main(img_og, img_threshold)
