@@ -218,8 +218,10 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 	if position < (-0.03) or position > (0.03):
 		# cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
 		if position < (-0.03):
+			print ("\n\nALERTING RIGHT\n\n")
 			alert("right")
 		if position > (0.03):
+			print ("\n\nALERTING LEFT\n\n")
 			alert("left")
 	else:
 		alert("start")
