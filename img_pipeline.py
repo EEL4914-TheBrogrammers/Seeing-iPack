@@ -200,7 +200,10 @@ def invert_perspective(img, src_pts, dst_pts, img_size):
 	result = cv2.warpPerspective(img, inv_matrix, dsize=img_size, flags = cv2.INTER_LINEAR)
 	return inv_matrix, result
 
-def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad, position):    
+def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad, position):
+	global alert_left
+	global alert_right
+	
 	height,width = img.shape[0],img.shape[1]
 
 	ploty = np.linspace(0, height-1, num=height)
