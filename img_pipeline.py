@@ -216,10 +216,10 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 	lane_area =  np.zeros_like(img).astype(np.uint8)
 
 	if position < (-0.05) or position > (0.05):
-	    cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
-    else:
-        alert("start")
-        cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
+		cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
+	else:
+		alert("start")
+		cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
 
 	cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=5)
 	cv2.polylines(lane_area, np.int32([pts_right]), isClosed=False, color=(255,20,147), thickness=5)
