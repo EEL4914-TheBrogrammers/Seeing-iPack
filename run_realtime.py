@@ -62,15 +62,11 @@ def main():
 	print(time.time() - start)
 	
 	cv2.VideoCapture(0).release()
-	
-	dir_path = "realtime/processed_img"
-	dir_list = os.listdir(dir_path)
-	num_files = len(dir_list)
 
 	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 20, (1280, 720))
 
-	for i in processed_buffer:
-		video.write(i)
+	for i in range(len(processed_buffer)):
+		video.write(processed_buffer[i])
 
 	cv2.destroyAllWindows()
 	video.release()
