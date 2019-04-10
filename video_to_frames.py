@@ -7,8 +7,8 @@ success, image = vidcap.read()
 count = 0
 
 while success:
-	image = cv2.resize(image, (1280, 720))
-	#~ image = cv2.resize(image, (540, 268))
+	image = cv2.resize(image, (420, 420))
+	#~ image = cv2.resize(image, (1280, 720))
 	cv2.imwrite("bleh/frame%d.jpg" % count, image)     # save frame as JPEG file      
 	success, image = vidcap.read()
 	print('Read a new frame: ', success)

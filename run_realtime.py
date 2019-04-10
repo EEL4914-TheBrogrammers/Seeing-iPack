@@ -63,6 +63,8 @@ from spi_rpi import alert
 # 	cv2.destroyAllWindows()
 # 	video.release()
 
+global left_total
+global right_total
 
 def main():
 	alert("start")
@@ -86,7 +88,7 @@ def main():
 
 		# Process image and impose lane
 		start = time.time()
-		lane_img = img_pipeline_main(img_og, img_threshold)
+		lane_img, alert_left, alert_right = img_pipeline_main(img_og, img_threshold)
 		print ("\tProcessing Image: " + str(time.time() - start))
 
 		# Append processed image to create video later
@@ -95,6 +97,7 @@ def main():
 		
 	print ("\nTotal time: " + str(time.time() - start_all))
 
+	print ("\nCompiling video...")
 	img = cv2.imread(dir_path + "frame1.jpg")
 	height, width = img.shape[:2]
 	size = (width, height)
@@ -105,6 +108,8 @@ def main():
 
 	cv2.destroyAllWindows()
 	video.release()
+
+	print ("\nCompilation complete")
 	
 if __name__ == "__main__":
     main()

@@ -21,16 +21,13 @@ from spi_rpi import alert
 ====================================================
 """
 
-global alert_left
-global alert_right
-
 # Define perspective points
 def define_perspective_points(img):
 	w, h = img.shape[1], img.shape[0]
 	# src_pts = np.float32([[(w/2)-390, (h/2)],[(w/8), h],[(w*7/8), h],[(w/2)+390, (h/2)]])
 	# dst_pts = np.float32([[w/4, 0],[w/4, h],[w*3/4, h],[w*3/4, 0]])
+	# src_pts = np.float32([[(w*2/8), (h/2)],[10, h],[1270, h],[(w*6/8), (h/2)]])
 
-#    src_pts = np.float32([[(w*2/8), (h/2)],[10, h],[1270, h],[(w*6/8), (h/2)]])
 	src_pts = np.float32([[(w*2/8), (h/2)],[5, h],[w - 5, h],[(w*6/8), (h/2)]])
 	dst_pts = np.float32([[w/4, 0],[w/4, h],[w*3/4, h],[w*3/4, 0]])
 
@@ -46,10 +43,10 @@ def perspective_transformation(img, src_pts, dst_pts, img_size):
 def radius_curvature(ploty, left_fitx, right_fitx, shape):
 	# ym_per_pix = 30/720 # meters per pixel in y dimension
 	# xm_per_pix = 3.7/700 # meters per pixel in x dimension
-	ym_per_pix = 7/720 # meters per pixel in y dimension
-	xm_per_pix = 1/1500 # meters per pixel in x dimension
+	ym_per_pix = 7/480 # meters per pixel in y dimension
+	xm_per_pix = 1/750 # meters per pixel in x dimension
 	y_eval = np.max(ploty)
-	
+
 	# Fit new polynomials to x,y in world space
 	left_fit_cr = np.polyfit(ploty*ym_per_pix, left_fitx*xm_per_pix, 2)
 	right_fit_cr = np.polyfit(ploty*ym_per_pix, right_fitx*xm_per_pix, 2)
@@ -58,7 +55,7 @@ def radius_curvature(ploty, left_fitx, right_fitx, shape):
 	left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
 	right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
 	mean_curverad = round(np.mean([left_curverad, right_curverad]), 2)
-	
+
 	# Find vehicle position
 	frame_center_pixels = shape[1]/2
 	camera_position_pixels = ((left_fitx[-1]+right_fitx[-1])/2)
@@ -85,7 +82,7 @@ def find_lines(img_warp):
 	rightx_base = np.argmax(histogram[midpoint:]) + midpoint	# Max of right half
 
 	# Choose the number of sliding windows
-	nwindows = 30
+	nwindows = 20
 
 	# Set height of windows
 	window_height = np.int(img_warp.shape[0]/nwindows)
@@ -205,8 +202,8 @@ def invert_perspective(img, src_pts, dst_pts, img_size):
 	return inv_matrix, result
 
 def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad, position):
-	global alert_left
-	global alert_right
+	alert_left = 0
+	alert_right = 0
 
 	height,width = img.shape[0],img.shape[1]
 
@@ -224,22 +221,11 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 
 	if position < (-0.03) or position > (0.03):
 		cv2.fillPoly(lane_area, np.int_([pts]), (0,0,255))
-		if position < (-0.03):
-			alert_left = 0
-			alert_right += 1
-			if alert_right == 1:
-				print ("\n\nALERTING RIGHT\n\n")
-				alert("right")
-		elif position > (0.03):
-			alert_right = 0
-			alert_left += 1
-			if alert_left == 1:
-				print ("\n\nALERTING LEFT\n\n")
-				alert("left")
+#		if position < (-0.03):
+#			alert_right = 1
+#		elif position > (0.03):
+#			alert_left = 1
 	else:
-		alert_left = 0
-		alert_right = 0
-		alert("start")
 		cv2.fillPoly(lane_area, np.int_([pts]), (0,200,0))
 
 	cv2.polylines(lane_area, np.int32([pts_left]), isClosed=False, color=(255,20,147), thickness=5)
@@ -254,9 +240,9 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 	# if position < (-0.35) or position > (0.35):
 	# 	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 3)
 	# else:
-	cv2.putText(result, center_text,(30, 180), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (255, 255, 255), 3)
+	cv2.putText(result, center_text,(10, 50), cv2.FONT_HERSHEY_TRIPLEX, 0.7, (255, 255, 255), 3)
 
-	return result
+	return result, alert_left, alert_right
 
 def img_pipeline_main(img_og, img_threshold):
 	img_size = (img_threshold.shape[1], img_threshold.shape[0])
@@ -277,6 +263,16 @@ def img_pipeline_main(img_og, img_threshold):
 	left_fit, right_fit, lines_img, mean_curverad, position = find_lines(warp_img)
 	print ("Find Lines: " + str(time.time() - start))
 
+	if position < (-0.03):
+		alert("right")
+		print("\n\nALERT RIGHT\n\n")
+	elif position > (0.03):
+		alert("left")
+		print("\n\nALERT LEFT\n\n")
+	else:
+		alert("start")
+		print ("\n\nTURNING OFF ALERT SYSTEM\n\n")
+
 	# Unwarp transformed perspective image
 	start = time.time()
 	inv_matrix, unwarp_img = invert_perspective(warp_img, src_pts, dst_pts, img_size)
@@ -285,12 +281,12 @@ def img_pipeline_main(img_og, img_threshold):
 	# plt.show()
 
 	start = time.time()
-	lane_img = superimpose_lane_area(img_og, warp_img, left_fit, right_fit, inv_matrix, mean_curverad, position)
+	lane_img, alert_left, alert_right = superimpose_lane_area(img_og, warp_img, left_fit, right_fit, inv_matrix, mean_curverad, position)
 	print ("Superimpose Lane Area: " + str(time.time() - start))
 	# plt.imshow(lane_img)
 	# plt.show()
 
-	return lane_img
+	return lane_img, alert_left, alert_right
 
 def main():
 	if len(sys.argv) != 2:

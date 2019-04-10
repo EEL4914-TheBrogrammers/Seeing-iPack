@@ -111,7 +111,7 @@ def draw_contour(img, img_blur, contour_color):
 def threshold_contour_img(img):
 	lower = np.array([245, 0, 0])						# Determine lower bound of red line
 	higher = np.array([255, 0, 0])						# Determine higher bound of red line
-	img_threshold = cv2.inRange(img, lower, higher)		# Apply range of pixel values to image
+	img_threshold = cv2.inRange(img, lower, higher)				# Apply range of pixel values to image
 
 	# plt.imshow(im_threshold, cmap = 'gray')
 	# plt.show()
