@@ -1,28 +1,77 @@
 import os
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-from draw_contour import draw_contour_main_realtime
-from img_pipeline import img_pipeline_main
-from picamera.array import PiRGBArray
-from picamera import PiCamera
+import sys
 import time
+import subprocess
+import numpy as np
+import RPi.GPIO as GPIO
+import matplotlib.pyplot as plt
+
+from picamera import PiCamera
+from picamera.array import PiRGBArray
+
 from spi_rpi import alert
+from img_pipeline import img_pipeline_main
+from draw_contour import draw_contour_main_realtime
+
+processed_buffer = []
+break_loop
+
+def definition():
+	global state
+	global break_loop
+	break_loop = 0
+	state = 0
+
+def setup_GPIO():
+	print ("Setting up button...")
+	GPIO.setwarnings(False)
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	print ("Setup complete...")
+
+def button_callback(channel):
+	global state
+	if state == 1:
+		print("Stopped")
+		create_video()
+		state = 0
+
+def create_video():
+	global break_loop
+	cv2.VideoCapture(0).release()
+
+	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 60, (420, 420))
+
+	for i in range(len(processed_buffer)):
+		video.write(processed_buffer[i])
+
+	cv2.destroyAllWindows()
+	video.release()
+
+	break_loop = 1
 
 def main():
 	alert("start")
+
+	# Setting up GPIO interrupt
+	print ("Setting up GPIO pin...\n")
+	definition()
+	setup_GPIO()
+	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime=200)
+	print ("GPIO setup complete...\n")
+
+	# Setting up camera
+	print ("Warming up camera...\n")
 	camera = PiCamera()
 	camera.resolution = (420, 420)
 	rawCapture = PiRGBArray(camera, size =(420, 420))
-
-	print ("Warming up camera...\n")
 	time.sleep(2)
-	print ("Setup complete...\n")
+	print ("Camera setup complete...\n")
 	
 	frames = 60
 	counter = 0
 	
-	processed_buffer = []
 	start_all = time.time()
 
 	for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -47,23 +96,21 @@ def main():
 		processed_buffer.append(lane_img)
 
 		print ("\nSingle Frame Processing Time: " + str(time.time() - start_single_frame) + "\n")
-		
-		if counter == 100:
+
+		if break_loop == 1:
 			break
-			
-		counter += 1
 
 	print(time.time() - start_all)
 	
-	cv2.VideoCapture(0).release()
+	# cv2.VideoCapture(0).release()
 
-	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 60, (640, 368))
+	# video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 60, (640, 368))
 
-	for i in range(len(processed_buffer)):
-		video.write(processed_buffer[i])
+	# for i in range(len(processed_buffer)):
+	# 	video.write(processed_buffer[i])
 
-	cv2.destroyAllWindows()
-	video.release()
+	# cv2.destroyAllWindows()
+	# video.release()
 
 # global left_total
 # global right_total
