@@ -100,6 +100,8 @@ def main():
 		if break_loop == 1:
 			break
 
+		counter += 1
+
 	print(time.time() - start_all)
 	
 	# cv2.VideoCapture(0).release()
