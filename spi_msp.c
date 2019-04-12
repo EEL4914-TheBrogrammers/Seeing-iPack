@@ -9,9 +9,11 @@
 void spi_init() {
     while (P1IN & BIT5);                        // If clock sig from mstr stays low, it is not yet in SPI mode
 
-    P1->SEL0 |= BIT5 | BIT6 | BIT7;             // P6.3 Clk, P1.6 SIMO, P1.7 SOMI
+    P1->SEL0 |= BIT5 | BIT6 | BIT7;             // P1.5 Clk, P1.6 SIMO, P1.7 SOMI
 
     P5->DIR |= BIT3 | BIT2;
+    P5->OUT &= ~BIT3;
+    P5->OUT &= ~BIT2;
 
     EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;     // Put eUSCI state machine in reset
     EUSCI_B0->CTLW0 = EUSCI_B_CTLW0_SWRST |     // Remain eUSCI state machine in reset
@@ -24,6 +26,7 @@ void spi_init() {
     EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;    // Initialize USCI state machine
 
     cmd_index = 0;
+    start = 0;
 }
 
 // SPI interrupt initialization
@@ -43,15 +46,15 @@ void EUSCIB0_IRQHandler() {
         if (strncmp(cmdbuf, "0", 1) == 0) {         // Left trigger
             P5OUT |= BIT3;
             P5OUT &= ~BIT2;
-            __delay_cycles(200);
         } else if (strncmp(cmdbuf, "1", 1) == 0) {  // Right trigger
             P5OUT |= BIT2;
             P5OUT &= ~BIT3;
-            __delay_cycles(200);
-        }
-        else if (strncmp(cmdbuf, "2", 1) == 0) {  // On trigger
-            P5OUT &= ~BIT3;                          // Place holder, do something
+        } else if (strncmp(cmdbuf, "2", 1) == 0) {  // Stop buzzers
+            P5OUT &= ~BIT3;
             P5OUT &= ~BIT2;
+            start = 0;
+        } else if (strncmp(cmdbuf, "3", 1) == 0) {  // Start program
+            start = 1;
         }
         cmd_index = 0;
     } else {
