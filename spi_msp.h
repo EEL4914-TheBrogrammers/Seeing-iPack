@@ -23,6 +23,7 @@
 char cmdbuf[BUF_SIZE];
 int cmd_index;
 int start;
+int stop;
 
 
 /**************************************************
