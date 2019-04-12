@@ -11,7 +11,7 @@ void spi_init() {
 
     P1->SEL0 |= BIT5 | BIT6 | BIT7;             // P1.5 Clk, P1.6 SIMO, P1.7 SOMI
 
-    P5->DIR |= BIT3 | BIT2;
+    P5->DIR |= BIT3 | BIT2;                     // (L, R)
     P5->OUT &= ~BIT3;
     P5->OUT &= ~BIT2;
 
@@ -27,6 +27,7 @@ void spi_init() {
 
     cmd_index = 0;
     start = 0;
+    stop = 0;
 }
 
 // SPI interrupt initialization
@@ -52,9 +53,13 @@ void EUSCIB0_IRQHandler() {
         } else if (strncmp(cmdbuf, "2", 1) == 0) {  // Stop buzzers
             P5OUT &= ~BIT3;
             P5OUT &= ~BIT2;
+            stop = 1;
             start = 0;
         } else if (strncmp(cmdbuf, "3", 1) == 0) {  // Start program
+            P5OUT &= ~BIT3;
+            P5OUT &= ~BIT2;
             start = 1;
+            stop = 0;
         }
         cmd_index = 0;
     } else {
