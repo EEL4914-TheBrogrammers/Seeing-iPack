@@ -14,13 +14,8 @@ from spi_rpi import alert
 from img_pipeline import img_pipeline_main
 from draw_contour import draw_contour_main_realtime
 
-processed_buffer = []
-break_loop
-
 def definition():
 	global state
-	global break_loop
-	break_loop = 0
 	state = 0
 
 def setup_GPIO():
@@ -32,16 +27,21 @@ def setup_GPIO():
 
 def button_callback(channel):
 	global state
-	if state == 1:
-		print("Stopped")
-		create_video()
+	print ("\n\n\n\nIN BUTTON CALLBACK")
+	print ("Button: ", state)
+	if state == 0:
+		print ("Starting")
+		alert("start")
+#		create_video()
+		state = 1
+	elif state == 1:
+		cv2.VideoCapture(0).release()
+		print ("Stopping")
+		alert("stop")
 		state = 0
 
 def create_video():
-	global break_loop
-	cv2.VideoCapture(0).release()
-
-	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 60, (420, 420))
+	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
 
 	for i in range(len(processed_buffer)):
 		video.write(processed_buffer[i])
@@ -49,10 +49,20 @@ def create_video():
 	cv2.destroyAllWindows()
 	video.release()
 
-	break_loop = 1
+def camera_setup():
+	print("Warming up camera...\n")
+	camera = PiCamera()
+	camera.resolution = (420, 420)
+	rawCapture = PiRGBArray(camera, size =(420, 420))
+	time.sleep(2)
+
+	print ("Camera setup complete...\n")
+
+	return camera, rawCapture
 
 def main():
-	alert("start")
+	global start_all
+	alert("stop")
 
 	# Setting up GPIO interrupt
 	print ("Setting up GPIO pin...\n")
@@ -61,61 +71,64 @@ def main():
 	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime=200)
 	print ("GPIO setup complete...\n")
 
-	# Setting up camera
-	print ("Warming up camera...\n")
-	camera = PiCamera()
-	camera.resolution = (420, 420)
-	rawCapture = PiRGBArray(camera, size =(420, 420))
-	time.sleep(2)
-	print ("Camera setup complete...\n")
-	
 	frames = 60
 	counter = 0
-	
-	start_all = time.time()
+	global state
 
-	for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-		start_single_frame = time.time()
+	while(1):
+		state = 0
 
-		print (counter)
-		image = np.array(frame.array)
-		
-		rawCapture.seek(0)
-		rawCapture.truncate()
-		
-		# Draw contours on image
-		start = time.time()
-		img_threshold = draw_contour_main_realtime(image)
-		print ("\tContouring Image: " + str(time.time() - start))
+		while(state == 0):
+			time.sleep(0.2)
 
-		# Process image and impose lane
-		start = time.time()
-		lane_img, alert_left, alert_right = img_pipeline_main(image, img_threshold)
-		print ("\tProcessing Image: " + str(time.time() - start))
-		
-		processed_buffer.append(lane_img)
+		# Set up camera
+		camera, rawCapture = camera_setup()
 
-		print ("\nSingle Frame Processing Time: " + str(time.time() - start_single_frame) + "\n")
+		processed_buffer = []
 
-		if break_loop == 1:
-			break
+		for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+			start_single_frame = time.time()
+			if(state == 0):
+				break
 
-		counter += 1
+			print (counter)
+			image = np.array(frame.array)
 
-	print(time.time() - start_all)
-	
-	# cv2.VideoCapture(0).release()
+			rawCapture.seek(0)
+			rawCapture.truncate()
 
-	# video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 60, (640, 368))
+			# Draw contours on image
+			start = time.time()
+			img_threshold = draw_contour_main_realtime(image)
+			print ("\tContouring Image: " + str(time.time() - start))
 
-	# for i in range(len(processed_buffer)):
-	# 	video.write(processed_buffer[i])
+			# Process image and impose lane
+			start = time.time()
+			lane_img, alert_left, alert_right = img_pipeline_main(image, img_threshold)
+			print ("\tProcessing Image: " + str(time.time() - start))
 
-	# cv2.destroyAllWindows()
-	# video.release()
+			processed_buffer.append(lane_img)
 
-# global left_total
-# global right_total
+			print ("\nSingle Frame Processing Time: " + str(time.time() - start_single_frame) + "\n")
+
+		# Close camera
+		camera.close()
+
+		print ("\nCompiling video...")
+		video = cv2.VideoWriter('video_real_time.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
+
+		for i in range(len(processed_buffer)):
+			video.write(processed_buffer[i])
+
+		# Free memory
+		processed_buffer = None
+
+		cv2.destroyAllWindows()
+		video.release()
+
+		print ("\nFinished compiling video...")
+		print ("\nIdling...")
+
 
 # def main():
 # 	alert("start")

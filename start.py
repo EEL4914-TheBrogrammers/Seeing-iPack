@@ -12,6 +12,7 @@ def setup_GPIO():
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	#GPIO.setup(25, GPIO.IN)
 	print ("Setup complete...")
 
 def button_callback(channel):
@@ -31,7 +32,7 @@ if __name__ == '__main__':
 	definition()
 	setup_GPIO()
 
-	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime=200)
+	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime = 200)
 
 	while True:
 		time.sleep(1e6)
