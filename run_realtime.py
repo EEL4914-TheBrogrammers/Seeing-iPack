@@ -32,13 +32,14 @@ def button_callback(channel):
 	if state == 0:
 		print ("Starting")
 		alert("start")
-#		create_video()
 		state = 1
+		time.sleep(0.2)
 	elif state == 1:
-		cv2.VideoCapture(0).release()
+#		cv2.VideoCapture(0).release()
 		print ("Stopping")
 		alert("stop")
 		state = 0
+		time.sleep(0.2)
 
 def create_video():
 	video = cv2.VideoWriter('video_real_test.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
@@ -68,7 +69,7 @@ def main():
 	print ("Setting up GPIO pin...\n")
 	definition()
 	setup_GPIO()
-	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime=200)
+	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime=300)
 	print ("GPIO setup complete...\n")
 
 	frames = 60
@@ -87,6 +88,7 @@ def main():
 		processed_buffer = []
 
 		for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+			print (counter)
 			start_single_frame = time.time()
 			if(state == 0):
 				break
@@ -111,23 +113,24 @@ def main():
 
 			print ("\nSingle Frame Processing Time: " + str(time.time() - start_single_frame) + "\n")
 
+			counter += 1
 		# Close camera
 		camera.close()
 
-		print ("\nCompiling video...")
-		video = cv2.VideoWriter('video_real_time.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
+#		print ("\nCompiling video...")
+#		video = cv2.VideoWriter('video_real_time.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
 
-		for i in range(len(processed_buffer)):
-			video.write(processed_buffer[i])
+#		for i in range(len(processed_buffer)):
+#			video.write(processed_buffer[i])
 
 		# Free memory
-		processed_buffer = None
+#		processed_buffer = None
 
-		cv2.destroyAllWindows()
-		video.release()
+#		cv2.destroyAllWindows()
+#		video.release()
 
-		print ("\nFinished compiling video...")
-		print ("\nIdling...")
+#		print ("\nFinished compiling video...")
+#		print ("\nIdling...")
 
 
 # def main():
