@@ -16,6 +16,8 @@ from draw_contour import draw_contour_main_realtime
 
 def definition():
 	global state
+	global pressed
+	pressed = 0
 	state = 0
 
 def setup_GPIO():
@@ -27,18 +29,21 @@ def setup_GPIO():
 
 def button_callback(channel):
 	global state
+	global pressed
 	print ("\n\n\n\nIN BUTTON CALLBACK")
 	print ("Button: ", state)
 	if state == 0:
 		print ("Starting")
 		alert("start")
 		state = 1
+#		pressed = 1
 		time.sleep(0.2)
 	elif state == 1:
 #		cv2.VideoCapture(0).release()
 		print ("Stopping")
-		alert("stop")
+		#alert("stop")
 		state = 0
+#		pressed = 1
 		time.sleep(0.2)
 
 def create_video():
@@ -63,7 +68,7 @@ def camera_setup():
 
 def main():
 	global start_all
-	alert("stop")
+	#alert("stop")
 
 	# Setting up GPIO interrupt
 	print ("Setting up GPIO pin...\n")
@@ -75,8 +80,13 @@ def main():
 	frames = 60
 	counter = 0
 	global state
+	global pressed
+
+	state = 0
+	blah = 0
 
 	while(1):
+		blah = 0
 		state = 0
 
 		while(state == 0):
@@ -88,12 +98,21 @@ def main():
 		processed_buffer = []
 
 		for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+			mer = 0
 			print (counter)
 			start_single_frame = time.time()
-			if(state == 0):
-				break
+#			if state == 0:
+#				break
+#			if (state == 0 and pressed == 1):
+#				print ("IN STOP LOGIC")
+#				alert("stop")
+#				pressed = 0
+#				break
+#			elif (state == 1 and pressed == 1):
+#				print ("IN START LOGIC")
+#				alert("start")
+#				pressed = 0
 
-			print (counter)
 			image = np.array(frame.array)
 
 			rawCapture.seek(0)
@@ -106,14 +125,21 @@ def main():
 
 			# Process image and impose lane
 			start = time.time()
-			lane_img, alert_left, alert_right = img_pipeline_main(image, img_threshold)
-			print ("\tProcessing Image: " + str(time.time() - start))
+			if state == 0:
+				alert("stop")
+				mer = 1
 
+			lane_img, alert_left, alert_right, temp = img_pipeline_main(image, img_threshold)
+			print ("\tProcessing Image: " + str(time.time() - start))
 			processed_buffer.append(lane_img)
 
 			print ("\nSingle Frame Processing Time: " + str(time.time() - start_single_frame) + "\n")
 
+			if state == 0 and mer == 1:
+				break
+
 			counter += 1
+
 		# Close camera
 		camera.close()
 

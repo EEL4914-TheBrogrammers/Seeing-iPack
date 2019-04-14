@@ -286,7 +286,7 @@ def img_pipeline_main(img_og, img_threshold):
 	# plt.imshow(lane_img)
 	# plt.show()
 
-	return lane_img, alert_left, alert_right
+	return lane_img, alert_left, alert_right, 1
 
 def main():
 	if len(sys.argv) != 2:
