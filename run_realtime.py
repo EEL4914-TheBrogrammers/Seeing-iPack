@@ -16,21 +16,19 @@ from draw_contour import draw_contour_main_realtime
 
 def definition():
 	global state
-	global pressed
-	pressed = 0
+
 	state = 0
 
 def setup_GPIO():
-	print ("Setting up button...")
+	print ("Setting up GPIO...\n")
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	print ("Setup complete...")
+	print ("GPIO setup complete...\n")
 
 def button_callback(channel):
 	global state
-	global pressed
-	print ("\n\n\n\nIN BUTTON CALLBACK")
+
 	print ("Button: ", state)
 	if state == 0:
 		print ("Starting")
@@ -57,44 +55,42 @@ def camera_setup():
 	camera.resolution = (420, 420)
 	rawCapture = PiRGBArray(camera, size =(420, 420))
 	time.sleep(2)
-
 	print ("Camera setup complete...\n")
 
 	return camera, rawCapture
 
 def main():
-	global start_all
-
-	# Setting up GPIO interrupt
-	print ("Setting up GPIO pin...\n")
-	definition()
-	setup_GPIO()
-	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime=300)
-	print ("GPIO setup complete...\n")
-
-	frames = 60
-	counter = 0
 	global state
-	global pressed
 
 	state = 0
 	blah = 0
+	frames = 60
+	frame_counter = 0
+	video_counter = 0
+
+	# Setting up GPIO interrupt
+	definition()
+	setup_GPIO()
+	GPIO.add_event_detect(2, GPIO.BOTH, callback=button_callback, bouncetime=300)
+	alert("gpio_config_stop")
 
 	while(1):
 		blah = 0
 		state = 0
+		processed_buffer = []
 
 		while(state == 0):
 			time.sleep(0.2)
 
-		# Set up camera
+		# Setting up camera
+		alert("cam_config_start")
 		camera, rawCapture = camera_setup()
-
-		processed_buffer = []
+		alert("cam_config_stop")
+		time.sleep(2)
 
 		for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-			mer = 0
-			print (counter)
+			frame_complete = 0
+			print (frame_counter)
 			start_single_frame = time.time()
 
 			image = np.array(frame.array)
@@ -111,21 +107,23 @@ def main():
 			start = time.time()
 			if state == 0:
 				alert("stop")
-				mer = 1
+				frame_complete = 1
 
-			lane_img, alert_left, alert_right, temp = img_pipeline_main(image, img_threshold)
+			lane_img, alert_left, alert_right = img_pipeline_main(image, img_threshold)
 			print ("\tProcessing Image: " + str(time.time() - start))
 			processed_buffer.append(lane_img)
 
 			print ("\nSingle Frame Processing Time: " + str(time.time() - start_single_frame) + "\n")
 
-			if state == 0 and mer == 1:
+			if state == 0 and frame_complete == 1:
 				break
 
-			counter += 1
+			frame_counter += 1
 
 		# Close camera
 		camera.close()
+
+		alert("pause")
 
 		print ("\nCompiling video...")
 		video = cv2.VideoWriter('video_real_time.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
@@ -141,6 +139,8 @@ def main():
 
 		print ("\nFinished compiling video...")
 		print ("\nIdling...")
+
+		alert("cam_compile_stop")
 
 
 # def main():
