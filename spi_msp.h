@@ -9,7 +9,7 @@
 
 /**************************************************
  *                                                *
- *                  Definitions                   *
+ *                  DEFINITIONS                   *
  *                                                *
  **************************************************/
 #define BUF_SIZE        (2)
@@ -17,18 +17,21 @@
 
 /**************************************************
  *                                                *
- *              Global Variables                  *
+ *              GLOBAL VARIABLES                  *
  *                                                *
  **************************************************/
 char cmdbuf[BUF_SIZE];
 int cmd_index;
 int start;
 int stop;
+int phrase;
+int speaking;
+int cam_config;
 
 
 /**************************************************
  *                                                *
- *              Function Prototypes               *
+ *              FUNCTION PROTOTYPES               *
  *                                                *
  **************************************************/
 void spi_init();                         // SPI initialization

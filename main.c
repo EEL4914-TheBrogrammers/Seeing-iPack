@@ -7,6 +7,7 @@
 #include "spi_msp.h"
 #include "ultra.h"
 #include "msp432p401r.h"
+#include "main.h"
 #include "msp432p401r_classic.h"
 
 /**************************************************
@@ -39,12 +40,7 @@
 //          SCL = P6.5
 
 
-/**************************************************
- *                                                *
- *              GLOBAL VARIABLES                  *
- *                                                *
- **************************************************/
-float dist = 0;
+
 
 /**************************************************
  *                                                *
@@ -61,9 +57,10 @@ void main(void) {
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
 
     // Welcome messages
-    speak("Yaaaaas queen. Let's get that shmoney.");
-//    speak("Hello! Welcome to Seeing eye pack.");
-//    speak("Now configuring....");
+    speak("Hello! Welcome to Seeing eye pack.");
+    speak("Setting up devices. Please wait.");
+
+    dist = 0;
 
     // SPI configuration for RPi
     spi_init();
@@ -71,14 +68,16 @@ void main(void) {
 
     while(1) {
         // Wait on RPi
-        while(start == 0);
+        while(start == 0) {
+            dist = 0;
+        }
 
         // Get distance measurement from left sensor
         initUltra(LEFT);
         dist = find_distance();
         __no_operation();
 //        check_bounds(dist, "left.");
-        if(dist < 30 && dist > 0 && stop == 0) {
+        if(dist < 30 && dist > 0 && stop == 0 && cam_config == 0) {
             speak("left.");
         }
         dist = 0;
@@ -87,7 +86,7 @@ void main(void) {
         initUltra(RIGHT);
         dist = find_distance();
 //        check_bounds(dist, "right.");
-        if(dist < 30 && dist > 0 && stop == 0) {
+        if(dist < 30 && dist > 0 && stop == 0 && cam_config == 0) {
             speak("right.");
         }
         dist = 0;
@@ -102,7 +101,7 @@ void main(void) {
         }
         dist = sumTemp/5;
 //        check_bounds(dist, "middle.");
-        if(dist < 50 && dist > 0 && stop == 0) {
+        if(dist < 50 && dist > 0 && stop == 0 && cam_config == 0) {
             speak("middle.");
         }
         dist = 0;

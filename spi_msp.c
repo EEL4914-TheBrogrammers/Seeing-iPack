@@ -1,10 +1,19 @@
-/*
- * spi_msp.c
- */
-
 #include "msp.h"
+#include "main.h"
+#include "tts.h"
 #include <spi_msp.h>
 
+/**************************************************
+ *                                                *
+ *                    NOTES                       *
+ *                                                *
+ **************************************************/
+
+/**************************************************
+ *                                                *
+ *                 FUNCTIONS                      *
+ *                                                *
+ **************************************************/
 // SPI initialization
 void spi_init() {
     while (P1IN & BIT5);                        // If clock sig from mstr stays low, it is not yet in SPI mode
@@ -28,6 +37,7 @@ void spi_init() {
     cmd_index = 0;
     start = 0;
     stop = 0;
+    cam_config = 0;
 }
 
 // SPI interrupt initialization
@@ -37,6 +47,7 @@ void spi_interrupt_init(){
     __enable_irq();                             // Global interrupt
 
     // Enable eUSCI_B0 interrupt in NVIC module
+    NVIC_SetPriority(EUSCIB0_IRQn, 2);    /* set priority to 3 in NVIC */
     NVIC->ISER[0] = 1 << ((EUSCIB0_IRQn) & 31); // Enable interrupts
 }
 
@@ -60,6 +71,16 @@ void EUSCIB0_IRQHandler() {
             P5OUT &= ~BIT2;
             start = 1;
             stop = 0;
+            dist = 0;
+            cam_config = 1;
+        } else if (strncmp(cmdbuf, "4", 1) == 0) {
+            speak("Configuring camera. Please wait.");
+            cam_config++;
+        } else if (strncmp(cmdbuf, "5", 1) == 0) {
+            speak("Camera setup complete and ready.");
+            cam_config = 0;
+        } else if (strncmp(cmdbuf, "6", 1) == 0) {
+            speak("Eye pack setup complete.");
         }
         cmd_index = 0;
     } else {
