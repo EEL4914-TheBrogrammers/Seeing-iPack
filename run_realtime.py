@@ -36,14 +36,10 @@ def button_callback(channel):
 		print ("Starting")
 		alert("start")
 		state = 1
-#		pressed = 1
 		time.sleep(0.2)
 	elif state == 1:
-#		cv2.VideoCapture(0).release()
 		print ("Stopping")
-		#alert("stop")
 		state = 0
-#		pressed = 1
 		time.sleep(0.2)
 
 def create_video():
@@ -68,7 +64,6 @@ def camera_setup():
 
 def main():
 	global start_all
-	#alert("stop")
 
 	# Setting up GPIO interrupt
 	print ("Setting up GPIO pin...\n")
@@ -101,17 +96,6 @@ def main():
 			mer = 0
 			print (counter)
 			start_single_frame = time.time()
-#			if state == 0:
-#				break
-#			if (state == 0 and pressed == 1):
-#				print ("IN STOP LOGIC")
-#				alert("stop")
-#				pressed = 0
-#				break
-#			elif (state == 1 and pressed == 1):
-#				print ("IN START LOGIC")
-#				alert("start")
-#				pressed = 0
 
 			image = np.array(frame.array)
 
@@ -143,20 +127,20 @@ def main():
 		# Close camera
 		camera.close()
 
-#		print ("\nCompiling video...")
-#		video = cv2.VideoWriter('video_real_time.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
+		print ("\nCompiling video...")
+		video = cv2.VideoWriter('video_real_time.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
 
-#		for i in range(len(processed_buffer)):
-#			video.write(processed_buffer[i])
+		for i in range(len(processed_buffer)):
+			video.write(processed_buffer[i])
 
 		# Free memory
-#		processed_buffer = None
+		processed_buffer = None
 
-#		cv2.destroyAllWindows()
-#		video.release()
+		cv2.destroyAllWindows()
+		video.release()
 
-#		print ("\nFinished compiling video...")
-#		print ("\nIdling...")
+		print ("\nFinished compiling video...")
+		print ("\nIdling...")
 
 
 # def main():
