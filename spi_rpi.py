@@ -10,13 +10,13 @@ send_l = []
 send_r = []
 
 def alert(side):
-	if side == "left_motor":
+	if side == "left":
 		spi.xfer([0x30])
 		spi.xfer([0x0a])
-	elif side == "right_motor":
+	elif side == "right":
 		spi.xfer([0x31])
 		spi.xfer([0x0a])
-	elif side == "no_motor":
+	elif side == "no":
 		spi.xfer([0x32])
 		spi.xfer([0x0a])
 	elif side == "stop":
@@ -26,29 +26,33 @@ def alert(side):
 		spi.xfer([0x34])
 		spi.xfer([0x0a])
 	elif side == "gpio_config_stop":
+		print ("in gpio config stop")
 		spi.xfer([0x35])
 		spi.xfer([0x0a])
-		time.sleep(1)
+		time.sleep(2)
 		alert("dud")
 	elif side == "cam_config_start":
+		print ("in cam config start")
 		spi.xfer([0x36])
 		spi.xfer([0x0a])
-		time.sleep(1)
+		time.sleep(2)
 		alert("dud")
 	elif side == "cam_config_stop":
-		spi.xfer([0x37])
-		spi.xfer([0x0a])
-		time.sleep(1)
-		alert("dud")
-	elif side == "pause":
+                print ("in cam config stop")
+                spi.xfer([0x37])
+                spi.xfer([0x0a])
+                time.sleep(2)
+                alert("dud")
+	elif side == "video_compile_start":
+		print ("in pause")
 		spi.xfer([0x38])
 		spi.xfer([0x0a])
-		time.sleep(1)
+		time.sleep(2)
 		alert("dud")
-	elif side == "cam_compile_stop":
+	elif side == "video_compile_stop":
 		spi.xfer([0x39])
 		spi.xfer([0x0a])
-		time.sleep(1)
+		time.sleep(2)
 		alert("dud")
 	elif side == "dud":
 		spi.xfer([0x3A])

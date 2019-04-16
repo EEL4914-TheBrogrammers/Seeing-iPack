@@ -264,13 +264,13 @@ def img_pipeline_main(img_og, img_threshold):
 	print ("Find Lines: " + str(time.time() - start))
 
 	if position < (-0.03):
-		alert("right_motor")
+		alert("right")
 		print("\n\nALERT RIGHT\n\n")
 	elif position > (0.03):
-		alert("left_motor")
+		alert("left")
 		print("\n\nALERT LEFT\n\n")
 	else:
-		alert("no_motor")
+		alert("no")
 		print ("\n\nTURNING OFF ALERT SYSTEM\n\n")
 
 	# Unwarp transformed perspective image
@@ -286,7 +286,7 @@ def img_pipeline_main(img_og, img_threshold):
 	# plt.imshow(lane_img)
 	# plt.show()
 
-	return lane_img, alert_left, alert_right
+	return lane_img, alert_left, alert_right, 1
 
 def main():
 	if len(sys.argv) != 2:
