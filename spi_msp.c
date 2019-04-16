@@ -82,16 +82,20 @@ void EUSCIB0_IRQHandler() {
             cam_config = 1;
         } else if (strncmp(cmdbuf, "5", 1) == 0) {  // GPIO setup finished
             speak("Eye pack setup complete.");
-//        } else if (strncmp(cmdbuf, "6", 1) == 0) {  // Camera configuring
+        } else if (strncmp(cmdbuf, "6", 1) == 0) {  // Camera configuring
+            speak("Configuring camera. Please wait.");
 //            speak("Configuring camera. Please wait.", 1);
-//        } else if (strncmp(cmdbuf, "7", 1) == 0) {  // Camera setup finished
+        } else if (strncmp(cmdbuf, "7", 1) == 0) {  // Camera setup finished
+            speak("Camera setup complete and ready.");
+            cam_config = 0;
 //            speak("Camera setup complete and ready.", 1);
-//            cam_config = 0;
-//        } else if (strncmp(cmdbuf, "8", 1) == 0) {  // Program paused
-//            P5OUT &= ~BIT3;
-//            P5OUT &= ~BIT2;
+        } else if (strncmp(cmdbuf, "8", 1) == 0) {  // Program paused
+            P5OUT &= ~BIT3;
+            P5OUT &= ~BIT2;
+            speak("Eye pack paused. Compiling video.");
 //            speak("Eye pack paused. Compiling video.", 1);
-//        } else if (strncmp(cmdbuf, "9", 1) == 0) {  // Finished compiling video
+        } else if (strncmp(cmdbuf, "9", 1) == 0) {  // Finished compiling video
+            speak("Video compiled. Eye pack ready.");
 //            speak("Video compiled. Eye pack ready.", 1);
 //        } else if (strncmp(cmdbuf, ":", 1) == 0) {
 //            speak("Off path.", 1);

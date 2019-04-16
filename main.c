@@ -79,7 +79,7 @@ void main(void) {
         dist = find_distance();
         __no_operation();
 //        check_bounds(dist, "left.");
-        if(dist < 30 && dist > 0 && stop == 0) {
+        if(dist < 30 && dist > 0 && stop == 0 && cam_config == 0) {
             speak("left.");
         }
         dist = 0;
@@ -88,7 +88,7 @@ void main(void) {
         initUltra(RIGHT);
         dist = find_distance();
 //        check_bounds(dist, "right.");
-        if(dist < 30 && dist > 0 && stop == 0) {
+        if(dist < 30 && dist > 0 && stop == 0 && cam_config == 0) {
             speak("right.");
         }
         dist = 0;
@@ -103,7 +103,7 @@ void main(void) {
         }
         dist = sumTemp/5;
 //        check_bounds(dist, "middle.");
-        if(dist < 50 && dist > 0 && stop == 0) {
+        if(dist < 50 && dist > 0 && stop == 0 && cam_config == 0) {
             speak("middle.");
         }
         dist = 0;
