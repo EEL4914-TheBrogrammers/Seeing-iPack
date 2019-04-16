@@ -63,6 +63,11 @@ void main(void) {
 
     // Welcome messages
 //    speak("Yaaaaas queen. Let's get that shmoney.");
+
+    volume = 1;
+    speak("10.");
+    volume = 0;
+
     speak("Hello! Welcome to Seeing eye pack.");
     speak("Now configuring....");
 

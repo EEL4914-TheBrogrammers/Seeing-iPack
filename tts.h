@@ -6,4 +6,6 @@ extern void init(void);
 extern void clockSetup(void);
 extern void interruptsConfig(void);
 
+int volume;
+
 #endif /* TTS_H_ */

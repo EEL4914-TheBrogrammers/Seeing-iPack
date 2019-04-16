@@ -91,7 +91,12 @@ void EUSCIA0_IRQHandler(void)
                 SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
             } else {
                 while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-                EUSCI_A0->TXBUF = 'S';
+                if (volume == 1) {
+                    EUSCI_A0->TXBUF = 'V';
+                } else {
+                    EUSCI_A0->TXBUF = 'S';
+                }
+
                 int i = 0;
                 for(i = 0; i < size; i++) {
                     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
