@@ -11,10 +11,13 @@
 #define STATUS              (0x01)  // System status
 #define SLAVE_ADDR          (0x62)  // LiDAR slave address
 #define DISTANCE            (0x8f)  // Distance measurement
+#define HIGH                (0x0f)
+#define LOW                 (0x10)
 
 // Register commands
 #define RESET               (0x00)  // Reset registers to default
 #define START_MEASURE       (0x04)  // Start taking distance measurement
+#define NO_BIAS             (0x03)
 
 #define SAMPLES             (1)    // Total amount of samples
 
@@ -33,6 +36,8 @@ short hvalue;       // Distance measurement high byte
 int counter;        // Counter for inside interrupt
 int avg_count;      // Counter to calculate avg distance
 float sum;          // Sum of distances to calculate avg distance
+
+int bias_counter;
 
 
 /**************************************************

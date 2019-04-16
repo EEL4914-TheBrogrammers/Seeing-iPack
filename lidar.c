@@ -52,7 +52,7 @@ void i2c_tx(short address, short data) {
     while (!(EUSCI_B1->CTLW0 & EUSCI_B_CTLW0_TXSTP));           // Ensure stop condition got sent
     while (EUSCI_B1->IFG & EUSCI_B_IFG_TXIFG0);
 
-    for (i = 40; i > 0; i--);
+    for (i = 400; i > 0; i--);
 }
 
 // I2C receive function
@@ -68,9 +68,13 @@ unsigned short i2c_rx(short address) {
     while (!(EUSCI_B1->CTLW0 & EUSCI_B_CTLW0_TXSTP));           // Ensure stop condition got sent
     while (EUSCI_B1->IFG & EUSCI_B_IFG_TXIFG0);
 
-    for (i = 40; i > 0; i--);
+    for (i = 400; i > 0; i--);
 
-    counter = 6;
+//    if(address == STATUS) {
+//        counter = 7;
+//    } else {
+        counter = 6;
+//    }
 
     EUSCI_B1->CTLW0 &= ~EUSCI_B_CTLW0_TR;           //Set Receiver bit
     EUSCI_B1->CTLW0 |= EUSCI_B_CTLW0_TXSTT;         //Set start bit
@@ -80,7 +84,7 @@ unsigned short i2c_rx(short address) {
 
     counter = 0;
 
-    for (i = 40; i > 0; i--);
+    for (i = 400; i > 0; i--);
 
     return lvalue;
 }
@@ -103,7 +107,7 @@ void i2c_init() {
             EUSCI_B_CTLW0_SYNC |                // Sync mode
             EUSCI_B_CTLW0_SSEL__SMCLK;          // SMCLK
 
-    EUSCI_B1->BRW = 30;                         // Baud rate = SMCLK / 30 = 100kHz
+    EUSCI_B1->BRW = 120;                         // Baud rate = SMCLK / 30 = 100kHz
     EUSCI_B1->I2CSA = SLAVE_ADDR;               // Slave address
     EUSCI_B1->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;    // Release eUSCI from reset
 
@@ -111,6 +115,7 @@ void i2c_init() {
             EUSCI_B_IE_TXIE;
 
     avg_count = 0;
+    bias_counter = 0;
 }
 
 // Function to get distance reading from LiDAR
@@ -119,9 +124,35 @@ float get_distance(char* type) {
     float average_in;
 
     while (avg_count <= SAMPLES) {
-        i2c_tx(ACQ_COMMAND, START_MEASURE);     // (TX) Take distance measurement w/ receiver bias
-        i2c_rx(DISTANCE);                       // (TX + RX) Receive distance measurement
-        i2c_tx(ACQ_COMMAND, RESET);             // (TX) Reset all registers to default values
+
+        if(bias_counter == 0) {
+            i2c_tx(ACQ_COMMAND, START_MEASURE);     // (TX) Take distance measurement w/ receiver bias
+        } else {
+            i2c_tx(ACQ_COMMAND, NO_BIAS);     // (TX) Take distance measurement w/o receiver bias
+        }
+
+        bias_counter++;
+        bias_counter = bias_counter % 100;
+
+        i2c_rx(STATUS);
+        while(lvalue & 0x01) {
+            i2c_rx(STATUS);
+        }
+
+        i2c_rx(HIGH);
+
+        if(lvalue > 0) {
+            lvalue = 255;
+        } else {
+            i2c_rx(LOW);
+        }
+
+
+//        i2c_rx(DISTANCE);                       // (TX + RX) Receive distance measurement
+
+
+
+//        i2c_tx(ACQ_COMMAND, RESET);             // (TX) Reset all registers to default values
 
         // Average the distances for accurate distance
         if (avg_count == SAMPLES){

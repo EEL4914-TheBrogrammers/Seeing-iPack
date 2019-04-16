@@ -9,6 +9,9 @@
  *                                                *
  **************************************************/
 
+
+
+
 /**************************************************
  *                                                *
  *                 FUNCTIONS                      *
@@ -47,7 +50,7 @@ void spi_interrupt_init(){
     __enable_irq();                             // Global interrupt
 
     // Enable eUSCI_B0 interrupt in NVIC module
-    NVIC_SetPriority(EUSCIB0_IRQn, 2);    /* set priority to 3 in NVIC */
+    NVIC_SetPriority(EUSCIB0_IRQn, 2);    /* set priority to 2 in NVIC */
     NVIC->ISER[0] = 1 << ((EUSCIB0_IRQn) & 31); // Enable interrupts
 }
 
@@ -61,26 +64,39 @@ void EUSCIB0_IRQHandler() {
         } else if (strncmp(cmdbuf, "1", 1) == 0) {  // Right trigger
             P5OUT |= BIT2;
             P5OUT &= ~BIT3;
-        } else if (strncmp(cmdbuf, "2", 1) == 0) {  // Stop buzzers
+        } else if (strncmp(cmdbuf, "2", 1) == 0) {  // No motors
+            P5OUT &= ~BIT3;
+            P5OUT &= ~BIT2;
+            cam_config = 0;
+        } else if (strncmp(cmdbuf, "3", 1) == 0) {  // Stop motors
             P5OUT &= ~BIT3;
             P5OUT &= ~BIT2;
             stop = 1;
             start = 0;
-        } else if (strncmp(cmdbuf, "3", 1) == 0) {  // Start program
+        } else if (strncmp(cmdbuf, "4", 1) == 0) {  // Start program
             P5OUT &= ~BIT3;
             P5OUT &= ~BIT2;
             start = 1;
             stop = 0;
             dist = 0;
             cam_config = 1;
-        } else if (strncmp(cmdbuf, "4", 1) == 0) {
-            speak("Configuring camera. Please wait.");
-            cam_config++;
-        } else if (strncmp(cmdbuf, "5", 1) == 0) {
-            speak("Camera setup complete and ready.");
-            cam_config = 0;
-        } else if (strncmp(cmdbuf, "6", 1) == 0) {
+        } else if (strncmp(cmdbuf, "5", 1) == 0) {  // GPIO setup finished
             speak("Eye pack setup complete.");
+//        } else if (strncmp(cmdbuf, "6", 1) == 0) {  // Camera configuring
+//            speak("Configuring camera. Please wait.", 1);
+//        } else if (strncmp(cmdbuf, "7", 1) == 0) {  // Camera setup finished
+//            speak("Camera setup complete and ready.", 1);
+//            cam_config = 0;
+//        } else if (strncmp(cmdbuf, "8", 1) == 0) {  // Program paused
+//            P5OUT &= ~BIT3;
+//            P5OUT &= ~BIT2;
+//            speak("Eye pack paused. Compiling video.", 1);
+//        } else if (strncmp(cmdbuf, "9", 1) == 0) {  // Finished compiling video
+//            speak("Video compiled. Eye pack ready.", 1);
+//        } else if (strncmp(cmdbuf, ":", 1) == 0) {
+//            speak("Off path.", 1);
+//            P5OUT &= ~BIT3;
+//            P5OUT &= ~BIT2;
         }
         cmd_index = 0;
     } else {
