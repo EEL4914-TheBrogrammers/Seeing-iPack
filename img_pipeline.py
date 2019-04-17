@@ -244,7 +244,7 @@ def superimpose_lane_area(img, warp_img, l_fit, r_fit, inv_matrix, mean_curverad
 
 	return result, alert_left, alert_right
 
-def img_pipeline_main(img_og, img_threshold):
+def img_pipeline_main(img_og, img_threshold, vibe_r, vibe_l):
 	img_size = (img_threshold.shape[1], img_threshold.shape[0])
 
 	start = time.time()
@@ -263,10 +263,16 @@ def img_pipeline_main(img_og, img_threshold):
 	left_fit, right_fit, lines_img, mean_curverad, position = find_lines(warp_img)
 	print ("Find Lines: " + str(time.time() - start))
 
-	if position < (-0.03):
+	if (vibe_l == 1):
+		alert("left")
+		print("\n\nVibrate left\n\n")
+	elif (vibe_r == 1):
+		alert("right")
+		print("\n\nVibrate right\n\n")
+	if position < (-0.04):
 		alert("right")
 		print("\n\nALERT RIGHT\n\n")
-	elif position > (0.03):
+	elif position > (0.04):
 		alert("left")
 		print("\n\nALERT LEFT\n\n")
 	else:

@@ -139,6 +139,8 @@ def mask_imgs(img_og, img_thresh_1, img_thresh_2):
 	return target
 
 def draw_contour_main_realtime(img_og):
+	vibe_l = 0
+	vibe_r = 0
 	height, width = img_og.shape[:2]
 	
 	# ROI boundaries
@@ -154,7 +156,22 @@ def draw_contour_main_realtime(img_og):
 	start = time.time()
 	H, S, V = find_HSV(img_blur, ROI_H_LOW, ROI_H_HIGH, ROI_W_LOW, ROI_W_HIGH)	# Find HSV values for sidewalk
 	print ("Finding Image HSV: " + str(time.time() - start))
-	
+
+	if (H > 60 and H < 167) and (S > 51 and S < 255) and (V > 120 and V < 255):
+		RIGHT_H_LOW, RIGHT_H_HIGH = int(height/2 - 10), int(height/2 + 10)
+		RIGHT_W_LOW, RIGHT_W_HIGH = int(width - 10), width
+
+		H_R, S_R, V_R = find_HSV(img_blur, RIGHT_H_LOW, RIGHT_H_HIGH, RIGHT_W_LOW, RIGHT_W_HIGH)
+
+		LEFT_H_LOW, LEFT_H_HIGH = int(height/2 - 10), int(height/2 + 10)
+		LEFT_W_LOW, LEFT_W_HIGH = 0, 10
+
+		H_L, S_L, V_L = find_HSV(img_blur, LEFT_H_LOW, LEFT_H_HIGH, LEFT_W_LOW, LEFT_W_HIGH)
+
+		if (H_R > 60 and H_R < 167):
+			vibe_r = 1
+		elif (H_L > 60 and H_L < 167):
+			vibe_l = 1
 	start = time.time()
 	img_threshold_1 = threshold_img(img_blur, H, S, V)
 	print ("Thresholding Image: " + str(time.time() - start))
@@ -169,7 +186,7 @@ def draw_contour_main_realtime(img_og):
 	output_img = threshold_contour_img(img_contour)
 	print ("Thresholding Contoured Image: " + str(time.time() - start))
 
-	return output_img
+	return output_img, vibe_r, vibe_l
 
 def draw_contour_main(dir_path, in_fname):
 	out_fname_bw = 'bw_contour_' + in_fname

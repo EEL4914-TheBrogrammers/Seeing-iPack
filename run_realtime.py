@@ -96,6 +96,8 @@ def main():
 
 		for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 			mer = 0
+			vibe_r = 0
+			vibe_l = 0
 			print (counter)
 			start_single_frame = time.time()
 
@@ -106,7 +108,7 @@ def main():
 
 			# Draw contours on image
 			start = time.time()
-			img_threshold = draw_contour_main_realtime(image)
+			img_threshold, vibe_r, vibe_l = draw_contour_main_realtime(image)
 			print ("\tContouring Image: " + str(time.time() - start))
 
 			# Process image and impose lane
@@ -115,7 +117,7 @@ def main():
 				alert("stop")
 				mer = 1
 
-			lane_img, alert_left, alert_right, temp = img_pipeline_main(image, img_threshold)
+			lane_img, alert_left, alert_right, temp = img_pipeline_main(image, img_threshold, vibe_r, vibe_l)
 			print ("\tProcessing Image: " + str(time.time() - start))
 			processed_buffer.append(lane_img)
 
@@ -132,7 +134,8 @@ def main():
 		alert("video_compile_start")
 
 		print ("\nCompiling video...")
-		video = cv2.VideoWriter('video_real_time.avi', cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
+		dir_path = "/home/pi/Desktop/Github/new/Seeing-iPack/video.avi"
+		video = cv2.VideoWriter(dir_path, cv2.VideoWriter_fourcc(*'DIVX'), 10, (420, 420))
 
 		for i in range(len(processed_buffer)):
 			video.write(processed_buffer[i])
@@ -141,7 +144,7 @@ def main():
 		processed_buffer = None
 
 		cv2.destroyAllWindows()
-		video.release()
+		#video.release()
 
 		print ("\nFinished compiling video...")
 		print ("\nIdling...")
