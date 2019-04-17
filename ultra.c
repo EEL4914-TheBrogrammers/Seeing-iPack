@@ -14,7 +14,7 @@ void init_timer_left(void) {
     TA0CTL |= TASSEL_2 | MC_2 | ID_2 | TACLR;               // SMCLK, continuous mode, clock divider 4
 }
 
-void init_timer_right() {
+void init_timer_right(void) {
     TA0CCTL1 |= CM_3 | SCS | CCIS_0 | CAP | CCIE;   // Capture on both edges, synchronous capture, CCI0A input signal, enable interrupt (A0.3)
     TA0CTL |= TASSEL_2 | MC_2 | ID_2 | TACLR;               // SMCLK, continuous mode, clock divider 4
 }

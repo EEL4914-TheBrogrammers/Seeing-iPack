@@ -65,7 +65,7 @@ void main(void) {
 //    speak("Yaaaaas queen. Let's get that shmoney.");
 
     volume = 1;
-    speak("10.");
+    speak("18.");
     volume = 0;
 
     speak("Hello! Welcome to Seeing eye pack.");
